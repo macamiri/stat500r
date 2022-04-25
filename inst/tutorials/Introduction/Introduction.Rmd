@@ -1,0 +1,202 @@
+---
+title: "R Companion for STAT 500"
+author: "Mo Amiri"
+date: "2022-04-24"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+description: >
+  Learn how to use R to apply the concepts taught in the STAT 500 course.
+---
+
+```{css, echo=FALSE}
+body {
+  font-family: 'PT Sans', sans-serif;
+  font-size: 16px;
+  color: #FFFFFF;
+  background-color: #000000;
+}
+
+code {
+    font-family: 'Roboto Mono', 'Space Mono', monospace;
+    color: #383838;
+    background-color: #E1F5F5;
+    font-size: 12px;
+}
+
+h2 {
+  color: #CDBBFF;
+  font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
+}
+
+h3 {
+  color: #CDBBFF;
+  font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
+}
+
+h4 {
+  color: #CDBBFF;
+  font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
+}
+
+h5 {
+    color: darkorange;
+    background-color: white;
+    display: inline-block;
+    font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
+    font-size: 16px;
+}
+```
+
+
+```{r setup, include=FALSE}
+# Attach packages
+library(learnr)
+library(tidyverse)
+library(grocerycart)
+library(fontawesome)
+
+# Prepare data to be used
+data("grocery_data", package = "grocerycart")
+
+set.seed(500)
+grocery_data <- 
+  grocery_data %>% 
+  slice_sample(n = 1000) %>% 
+  select(-order_time, -long, -lat, -store) %>% 
+  relocate(customer_id, customer_name, customer_age, household_size, order_date, payment_method, 
+           .before = cost)
+
+grocery_data %>% 
+  group_by(household_size) %>% 
+  summarise(mean(cost), sd(cost), n())
+
+# Global code chunk options
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Start Here
+
+###Is this tutorial for me? 
+
+```{r fig1, echo = FALSE, out.height = "50%"}
+knitr::include_graphics(here::here("images/introduction.png"))  
+```
+
+In this tutorial, we'll start our journey of applying statistical methods in R. The lessons
+are inspired by [PennState's STAT 500: Applied Statistics course](https://online.stat.psu.edu/stat500/). 
+
+This tutorial assumes you have (1) basic understanding of R (eg., how to load packages, how to search help files for functions), and (2) sufficient knowledge of the material presented in STAT 500. Feel free to switch between this tutorial and each lesson's material.
+
+To clarify, this tutorial does not explain the concepts taught in STAT 500. It is a guide on how to apply those concepts in R. So, it is suited for anyone who is interested to learn how to start analyzing data in R.
+
+###Layout
+
+As you make your way through this tutorial, you will come across code examples and multiple choice questions (MCQ). 
+
+The code examples follow the `r fa("fas fa-code", fill = "#CDBBFF")` icon and they contain working code that you can run by pressing the ‘Run Code’ button. The MCQ follow the `r fa("fas fa-check-square", fill = "#CDBBFF")` icon (you can skip the questions).
+
+#### `r fa("fas fa-code", fill = "#CDBBFF")` Example 0.1
+
+This code example calculates the mean for 1, 2, 3, 4 and 5. Try running the code:
+
+```{r two-plus-two, exercise = TRUE}
+mean(1:5)
+```
+
+#### `r fa("fas fa-check-square", fill = "#CDBBFF")` MCQ: Average
+
+Submit your answer:
+
+```{r letter-a, echo = FALSE}
+question("What is another word for 'average'?",
+  answer("Median"),
+  answer("Standard Deviation"),
+  answer("Mean", correct = TRUE, message = "Woohoo! You're on the right track."),
+  answer("Variance")
+)
+```
+
+### Meet the data
+We will be working with grocery data for the entirety of this tutorial, so it's a good
+idea to understand it. Here's what you need to know for now:
+
+**Data source:** The data is a part of a package I wrote for scraping 2 online grocery websites. It was simulated with the help of other R packages and the variables are NOT based on 'real-life' people/orders. If interested, you can learn more about the [grocerycart package on Github](https://github.com/moamiristat/grocerycart)
+
+**Variables:**
+
+- `basket_id`: basket id
+- `order_id`: order id
+- `customer_id`: customer id
+- `customer_name`: random first and last name
+- `customer_age`: random age from 18 to 75
+- `household_size`: random number of people (1 to 7) living with customer, including customer
+- `order_date`: day, month and year of order
+- `payment_method`: 1 of 3 methods used to pay for the order
+- `cost`: total price of an order
+
+**Data table:** The data is already in tidy format so we can jump right into analyzing it. Here is a preview of 10 rows:
+
+```{r, echo = FALSE}
+grocery_data %>% 
+  slice(500:510)
+```
+
+We are finally ready to start exploring the data in R! 
+
+
+## Topic 2
+
+### Exercise with Hint
+
+*Here's an exercise where the chunk is pre-evaulated via the `exercise.eval` option (so the user can see the default output we'd like them to customize). We also add a "hint" to the correct solution via the chunk immediate below labeled `print-limit-hint`.*
+
+Modify the following code to limit the number of rows printed to 5:
+
+```{r print-limit, exercise=TRUE, exercise.eval=TRUE}
+mtcars
+```
+
+```{r print-limit-hint}
+head(mtcars)
+```
+
+### Quiz
+
+*You can include any number of single or multiple choice questions as a quiz. Use the `question` function to define a question and the `quiz` function for grouping multiple questions together.*
+
+Some questions to verify that you understand the purposes of various base and recommended R packages:
+
+```{r quiz}
+quiz(
+  question("Which package contains functions for installing other R packages?",
+    answer("base"),
+    answer("tools"),
+    answer("utils", correct = TRUE),
+    answer("codetools")
+  ),
+  question("Which of the R packages listed below are used to create plots?",
+    answer("lattice", correct = TRUE),
+    answer("tools"),
+    answer("stats"),
+    answer("grid", correct = TRUE)
+  )
+)
+```
+
+
+### Exercise with Code
+
+Here's an exercise with some prepopulated code as well as `exercise.lines = 5` to provide a bit more initial room to work.
+
+Now write a function that adds any two numbers and then call it:
+
+```{r add-function, exercise=TRUE, exercise.lines = 5}
+add <- function() {
+  
+}
+```
+
