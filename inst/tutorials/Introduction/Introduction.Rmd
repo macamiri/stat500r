@@ -4,6 +4,7 @@ author: "Mo Amiri"
 date: "2022-04-24"
 output: 
   learnr::tutorial:
+    css: css/stat_css.css
     progressive: true
     allow_skip: true
 runtime: shiny_prerendered
@@ -11,120 +12,83 @@ description: >
   Learn how to use R to apply the concepts taught in the STAT 500 course.
 ---
 
-```{css, echo=FALSE}
-body {
-  font-family: 'PT Sans', sans-serif;
-  font-size: 16px;
-  color: #FFFFFF;
-  background-color: #000000;
-}
-
-code {
-    font-family: 'Roboto Mono', 'Space Mono', monospace;
-    color: #383838;
-    background-color: #E1F5F5;
-    font-size: 12px;
-}
-
-h2 {
-  color: #CDBBFF;
-  font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
-}
-
-h3 {
-  color: #CDBBFF;
-  font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
-}
-
-h4 {
-  color: #CDBBFF;
-  font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
-}
-
-h5 {
-    color: darkorange;
-    background-color: white;
-    display: inline-block;
-    font-family: 'Tapestry', 'Caveat', 'Indie Flower', serif;
-    font-size: 16px;
-}
-```
-
-
 ```{r setup, include=FALSE}
 # Attach packages
 library(learnr)
 library(tidyverse)
 library(grocerycart)
 library(fontawesome)
+library(ggVennDiagram)
+library(DiagrammeR)
 
 # Prepare data to be used
 data("grocery_data", package = "grocerycart")
 
 set.seed(500)
-grocery_data <- 
+grocery_table <- 
   grocery_data %>% 
   slice_sample(n = 1000) %>% 
   select(-order_time, -long, -lat, -store) %>% 
+  mutate(across(.cols = c(household_size, payment_method), ~ as.factor(.))) %>% 
+  mutate(customer_age = as.integer(customer_age)) %>% 
   relocate(customer_id, customer_name, customer_age, household_size, order_date, payment_method, 
            .before = cost)
 
-grocery_data %>% 
+grocery_table %>% 
   group_by(household_size) %>% 
   summarise(mean(cost), sd(cost), n())
 
 # Global code chunk options
 knitr::opts_chunk$set(echo = FALSE)
+
 ```
 
+## Lesson 0: Introduction
 
-## Start Here
-
-###Is this tutorial for me? 
-
-```{r fig1, echo = FALSE, out.height = "50%"}
-knitr::include_graphics(here::here("images/introduction.png"))  
+```{r main-fig, echo = FALSE,  out.height = "50%"}
+knitr::include_graphics("images/introduction-background.jpg")
 ```
 
 In this tutorial, we'll start our journey of applying statistical methods in R. The lessons
 are inspired by [PennState's STAT 500: Applied Statistics course](https://online.stat.psu.edu/stat500/). 
 
-This tutorial assumes you have (1) basic understanding of R (eg., how to load packages, how to search help files for functions), and (2) sufficient knowledge of the material presented in STAT 500. Feel free to switch between this tutorial and each lesson's material.
+This **tutorial assumes** you have **(1)** R or RStudio installed, **(2)** basic understanding of R (eg., how to load packages), and **(3)** sufficient knowledge of the material presented in STAT 500. This tutorial is suited for anyone who is interested to apply the concepts from STAT 500 in R (we do not re-explain the concepts taught in STAT 500).
 
-To clarify, this tutorial does not explain the concepts taught in STAT 500. It is a guide on how to apply those concepts in R. So, it is suited for anyone who is interested to learn how to start analyzing data in R.
+### How to use this tutorial
 
-###Layout
+Each section in this tutorial is associated with the same numbered lesson from the course. As you make your way, you will come across code examples and multiple choice questions. 
 
-As you make your way through this tutorial, you will come across code examples and multiple choice questions (MCQ). 
+### `r fa("fas fa-lightbulb", fill = "#08192B")` = Example code
 
-The code examples follow the `r fa("fas fa-code", fill = "#CDBBFF")` icon and they contain working code that you can run by pressing the ‘Run Code’ button. The MCQ follow the `r fa("fas fa-check-square", fill = "#CDBBFF")` icon (you can skip the questions).
-
-#### `r fa("fas fa-code", fill = "#CDBBFF")` Example 0.1
+Keep an eye out for the lightbulb icon in the header for code examples. The examples contain pre-written, working code 
+that you can run by clicking on the blue 'Run Code' button in the upper right. In the event that you update the code and get an error message, just click on ‘Start Over’ in the upper left to automatically reset the code to the default.
 
 This code example calculates the mean for 1, 2, 3, 4 and 5. Try running the code:
 
-```{r two-plus-two, exercise = TRUE}
+```{r code-example, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 mean(1:5)
 ```
 
-#### `r fa("fas fa-check-square", fill = "#CDBBFF")` MCQ: Average
+### `r fa("fas fa-book", fill = "#08192B")` = Multiple Choice Questions
 
-Submit your answer:
+The (skippable) multiple choice questions follow the book icon. The questions are based on the concepts presented in the course, and may have multiple correct answers.
 
-```{r letter-a, echo = FALSE}
+Here is an example. Submit your answer:
+
+```{r mcq-example, echo = FALSE}
 question("What is another word for 'average'?",
   answer("Median"),
   answer("Standard Deviation"),
-  answer("Mean", correct = TRUE, message = "Woohoo! You're on the right track."),
+  answer("Mean", correct = TRUE, message = "You got the hang of it!"),
   answer("Variance")
 )
 ```
 
 ### Meet the data
 We will be working with grocery data for the entirety of this tutorial, so it's a good
-idea to understand it. Here's what you need to know for now:
+idea to get familiar with it. Here's what you need to know for now:
 
-**Data source:** The data is a part of a package I wrote for scraping 2 online grocery websites. It was simulated with the help of other R packages and the variables are NOT based on 'real-life' people/orders. If interested, you can learn more about the [grocerycart package on Github](https://github.com/moamiristat/grocerycart)
+**Data source:** The data is a part of an R package I built for scraping 2 online grocery websites. It was simulated with the help of other R packages. Note that the variables are NOT based on true/'real-life' people/orders. If interested, you can learn more about the [grocerycart package on Github](https://github.com/moamiristat/grocerycart).
 
 **Variables:**
 
@@ -138,65 +102,384 @@ idea to understand it. Here's what you need to know for now:
 - `payment_method`: 1 of 3 methods used to pay for the order
 - `cost`: total price of an order
 
-**Data table:** The data is already in tidy format so we can jump right into analyzing it. Here is a preview of 10 rows:
+**Data table:** The data is already in tidy/clean format so we can jump right into analyzing it. Here is a preview of the first 10 rows:
 
-```{r, echo = FALSE}
+```{r grocery-data, echo = FALSE}
 grocery_data %>% 
-  slice(500:510)
+  slice_head(n = 10)
 ```
 
-We are finally ready to start exploring the data in R! 
+We are finally ready to start with Lesson 1 and explore the data in R! 
 
 
-## Topic 2
+## Lesson 1
 
-### Exercise with Hint
+#### Objectives
 
-*Here's an exercise where the chunk is pre-evaulated via the `exercise.eval` option (so the user can see the default output we'd like them to customize). We also add a "hint" to the correct solution via the chunk immediate below labeled `print-limit-hint`.*
+For our first lesson, we'll learn about several R functions to summarize data and start getting familiar with the tidyverse:
 
-Modify the following code to limit the number of rows printed to 5:
+- `sample()`: Takes a random sample, with or without replacement, from a set
 
-```{r print-limit, exercise=TRUE, exercise.eval=TRUE}
-mtcars
+### sample() for random sampling
+
+Use [`sample()`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample) to take a random sample from a set of elements.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.1: Sample
+
+Let's take a sample of 5 customer names without replacement from our grocery data frame. Press 'Run Code' to sample.
+
+\**Note: To get a reproducible outcome (the same outcome every time you run the code), simply use the `set.seed()` function before sampling. `set.seed()` somewhat controls for the random part of the sampling.*
+
+```{r sample, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# set.seed(123)
+sample(x = grocery_table$customer_name, size = 5, replace = FALSE)
 ```
 
-```{r print-limit-hint}
-head(mtcars)
+### Summarize 1 Qualitative Variable
+
+We will start by constructing a proportion (contingency) table, pie chart and bar chart.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.2: Proportion Table
+
+The proportion table is a simple way to see the frequency distribution of variables. Let's check the breakdown of orders by household size. Run the code below to see that 18.90% of the orders were placed by customers who lived alone.
+
+```{r prop-table-base, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+prop.table(table(grocery_table$household_size))
 ```
 
-### Quiz
+As you get more familiar with R, you will realize that there's many different ways to do the same thing. Let's find the frequency distribution of orders by household size using `dplyr` (part of the **tidyverse**) and make the output more pretty.
 
-*You can include any number of single or multiple choice questions as a quiz. Use the `question` function to define a question and the `quiz` function for grouping multiple questions together.*
+An important **advantage of coding using the tidyverse is an improvement in code readability**. The **pipe operator** ` %>% ` is a convenient way to pass intermediate results onto the next function. For example you can re-write the same code above as `grocery_table$household_size %>% table() %>% prop.table`. Notice that the code is now read from 'inside' to 'outside', so it follows a natural call to functions. You can decide for yourself which one is easier to make sense of. Ok, back to our example:
 
-Some questions to verify that you understand the purposes of various base and recommended R packages:
+```{r prop-table-dplyr, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+grocery_table %>% 
+  count(household_size, name = "freq") %>% 
+  mutate(prop = scales::percent(freq / sum(freq)))
+```
 
-```{r quiz}
+\**Note: To learn more about what each function does, use `?`. For example, run `?mutate` in your R/RStudio environment.*
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.3: Pie Chart
+
+While there is a quick way to create a pie chart with the `pie()` function, we will dive into another part of the tidyverse: **ggplot2** is the premier data visualization package in R.
+
+It follows a simple idea of building visualization layers on top of each other with the `+` operator as you will see below. This means that the order in which you add the functions/layers matter when building plots using **ggplot2**.
+
+Before building our pie chart, we will need to do some data prep. First, we will count the absolute (#) and relative (%) frequency of each payment method. Then, build the pie chart for the payment methods.
+
+Notice the assignment ` <- ` operator. It is used to save (aka, assign) the results of some piece of code to some variable. Let's see everything in action below. Remember that you do not need to memorize the functions. Whenever you need help, just type `?*function name*` to remind yourself of the functions.
+
+- `ggplot()`: Initializes a ggplot object
+- `geom_col()`: Builds bar charts
+- `coord_polar()`: Transforms the coordinates to polar
+- `geom_text()`: Adds labels to plots
+- `str_glue()`: Formats strings/text 
+- `theme_void()`: Removes theme features
+- `scale_fill_brewer()`: Customizes plot colors
+- `theme()`: Adjusts theme
+
+```{r pie-chart, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+grocery_pie <- 
+  grocery_table %>% 
+  count(payment_method, name = "freq") %>% 
+  mutate(prop = scales::percent(freq / sum(freq)))
+
+grocery_pie %>% 
+  ggplot(aes(x = "", y = freq, fill = payment_method)) + 
+  geom_col() + 
+  coord_polar(theta = "y", direction = -1) + 
+  geom_text(aes(label = str_glue("{str_wrap(payment_method, 5)}\n{prop}")),  
+            position = position_stack(vjust = .5)) + 
+  theme_void() + 
+  scale_fill_brewer() + 
+  theme(legend.position = "none")
+```
+
+Remeber how **ggplot2** builds visualization layers on top of each other? In the example above, move `theme_void()` to the end and notice how the plot updates. Keep in mind that you do not need to memorize in what order to write the functions; with more practice you'll have a better understanding of what each layer does.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.4: Bar Chart
+
+Next up is the bar chart. Let's summarize the same data from Code 1.3 in the form of a bar chart. If you followed the pie chart example, then the bar chart will be a breeze. The `geom_col()` function is what builds the bar chart.
+
+```{r bar-chart, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+grocery_table %>% 
+  ggplot(aes(x = payment_method %>% fct_infreq())) + 
+  geom_bar(aes(fill = payment_method %>% fct_infreq(), color = NULL))  + 
+  viridis::scale_fill_viridis(discrete = TRUE) + 
+  labs(x = "Payment Method", y = "Frequency", title = "Payment Method Popularity") + 
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = "none", 
+        title = element_text(family = "Noteworthy Light"))
+```
+
+### Summarize 1 Qunatitative Variable
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.5: Central Tendency
+
+To find the mean and median in R is super easy, simply use `mean()` and `median()`. Meanwhile, base R does not have a function for mode, so we will need to create our own function to compute mode. This will be worth seeing if you've never defined a function before.
+
+Let's practice using `dplyr()` with the ` %>% ` operator by computing the measures of central tendency for the *cost* variable. First we define our mode function.
+
+Before we even go there, do you know what a *function* is? It has a similar meaning to functions in Mathematics. You input some values into the arguments (think of them as variables), then the function produces an output. That's it.
+
+The `function()` command lets R know that you are about to define a function. The arguments/inputs of the function are inserted between the `()`. Finally, the body of the function goes inside the curly brackets `{}`. An example will make things clear. Let's start by building a basic sum function, then our mode function.
+
+```{r addition-function, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+addition <- function(first_num, second_num) {
+  results <- first_num + second_num
+  
+  paste0("The result of ", first_num, " + ", second_num, " = ", results)
+}
+
+addition(first_num = 1, second_num = 3)
+```
+
+We called our function *addition* and will need to type it followed by *()* every time we want to invoke it. The arguments first_num and second_num are the variables where we include our inputs. Check out this blogpost for more on defining functions in R.
+
+Now, let's define our mode function. Alternatively, you can use the `Mode()` function in the `DescTools` package. Then, we will summarise the *cost* variable.
+
+```{r central-tendency, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+stat_mode <- function(x) {
+  x %>% 
+    unique() %>% 
+    .[which.max(tabulate(match(x, .)))]
+}
+
+grocery_table %>% 
+  summarise(average = mean(cost), 
+            middle = median(cost), 
+            most_freq = stat_mode(cost))
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.6: Position
+
+To find any percentile, simply use the `quantile()` function. Let's find the 20, 25, 50, 75 and 99th percentile of the *cost* variable. Notice that the 50th percentile = median from Code 1.5.
+
+```{r quantiles, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+quantile(grocery_table$cost, probs = c(.2, .25, .5, .75, .99))
+```
+
+#### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.7: 5 Number Summary
+
+The easiest way to find the 5 number summary of a quantitative variable is to use the `summary()` function.
+
+```{r num-summary, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+summary(grocery_table$cost)
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.8: Dotplot
+
+Let's create a dotplot using **ggplot2**. Let's take this chance to learn another useful function `filter()`. We will use to draw a dotplot to show the distribution of customer age for households of size 3.
+
+```{r dotplot, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+grocery_table %>% 
+  filter(household_size == 3) %>% 
+  ggplot(aes(x = customer_age)) + 
+  geom_dotplot(dotsize = .35, stackratio = 1.1, col = "salmon", fill = "salmon") + 
+  scale_y_continuous(NULL, breaks = NULL) + 
+  scale_x_continuous(name = "Customer Age", breaks = seq(18, 75, 10)) + 
+  ggpubr::theme_cleveland()
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.9: Stem & Leaf Plot
+
+Let's create a stem and leaf plot using base R since there is not much custimization that we can do with this plot.
+
+```{r stem-leaf-plot, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+stem(grocery_table$customer_age)
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.10: Histogram
+
+You can use `geom_histogram()` or `geom_density()` to display the distribution of a continuous variable using **ggplot2**. We'll use both for the *cost* variable, and also learn how to combine ggplot objects together with `ggarrange()`.
+
+```{r histogram, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+p1 <- grocery_table %>% 
+  ggplot(aes(x = cost)) + 
+  geom_histogram(col = "lightblue", fill = "steelblue", alpha = .65) + 
+  ggpubr::theme_pubclean()
+
+p2 <- grocery_table %>% 
+  ggplot(aes(x = cost)) + 
+  geom_density(col = "lightblue", fill = "steelblue", alpha = .65) + 
+  ggpubr::theme_pubclean()
+
+ggpubr::ggarrange(p1, p2)
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.11: Boxplot
+
+For our 2 final plots in this lesson, we will create 2 boxplots for **(1)** the *cost* variable, and **(2)** *cost* grouped by *payment method*.
+
+Here's the code for (1): you can skip/remove everyhting after `geom_boxplot()` if you just want to see a basic boxplot.
+
+```{r boxplot-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+grocery_table %>% 
+  ggplot(aes(y = cost), col = "#664EAB") + 
+  geom_boxplot() + 
+  labs(y = "Price") + 
+  geom_text(aes(label = "Median"), y = median(grocery_table$cost) + 5, x = -.3) + 
+  geom_text(aes(label = "Q1"), y = quantile(grocery_table$cost, probs = .25) + 5, x = -.3) + 
+  geom_text(aes(label = "Q3"), y = quantile(grocery_table$cost, probs = .75) + 5, x = -.3) + 
+  hrbrthemes::theme_ipsum(grid = "Y") + 
+  scale_x_continuous(breaks = NULL)
+```
+
+Now, let's see if there's a difference in the distribution of cost across the payment methods. `facet_wrap()` separates the boxplot above into 3 different graphs, 1 for each payment method. A quick look at the boxplots shows that customer spending behaviour has a similar distribution for each payment method.
+
+```{r boxplot-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+grocery_table %>% 
+  ggplot(aes(y = cost, col = payment_method)) + 
+  geom_boxplot(fill = NA) + 
+  facet_wrap(~ payment_method) + 
+  viridis::scale_color_viridis(discrete = TRUE) + 
+  labs(y = "Price") + 
+  scale_x_continuous(breaks = NULL) + 
+  theme(legend.position = "none")
+```
+
+
+## Lesson 2
+
+This is a short section. We will cover Venn diagrams and probability network/tree graphs.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.1: Ice Cream Data
+
+Think of a *list* object as the general form of a data table. All you need to know for now is that the elements in the *list* do not have to be the same length (vs the columns in a table).
+
+We will create a *list* to track what flavors were bought across 3 days at an ice cream shop. Assume that each flavor can be bought only once a day (sample without replacement), all the flavors are restocked at the end of the day, and they are equally likely to be chosen.
+
+Note our use of `sample()` and `set.seed()` that you learnt in Lesson 1.
+
+```{r ice-cream, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+fl<- paste0("Flavor#", 1:30)
+
+set.seed(500)
+ice_cream <- list(day1 = sample(fl, 10), 
+                  day2 = sample(fl, 20), 
+                  day3 = sample(fl, 5))
+
+ice_cream
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.2: Venn Diagrams
+
+The easiest way to draw venn diagrams with the **ggplot2** layout is by using the **ggvenn** or **ggVennDiagram** packages. You can choose either one. In this tutorial, we will be using **ggVennDiagram** to look at the small ice cream data.
+
+How many of the 50 possible flavors were bought on all 3 days? What about on day 1 and day 3 only? Let's build a venn diagram to find out.
+
+```{r venn-diagram, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Create the data
+fl<- paste0("Flavor#", 1:30)
+
+set.seed(500)
+ice_cream <- list(day1 = sample(fl, 10), 
+                  day2 = sample(fl, 20), 
+                  day3 = sample(fl, 5))
+
+# Build Venn Diagram
+ice_cream %>% 
+  ggVennDiagram(category.names = c("Day 1", "Day 2", "Day 3")) + 
+  scale_color_brewer(palette = "PRGn") + 
+  theme_void()
+```
+
+What is the venn diagram above telling us? 11 flavors of the 50 were bought only on day 2 (these 11 flavors were not bought on day 1 or 3). Day 1 and day 3 have 0 flavors in common. Test your understanding below:
+
+### `r fa("fas fa-book", fill = "#08192B")` MCQ 2.1: Venn Diagrams
+
+```{r venn-quiz}
 quiz(
-  question("Which package contains functions for installing other R packages?",
-    answer("base"),
-    answer("tools"),
-    answer("utils", correct = TRUE),
-    answer("codetools")
+  question("How many flavors do all the 3 days have in common?",
+    answer("0", correct = TRUE),
+    answer("2"),
+    answer("3"),
+    answer("7")
   ),
-  question("Which of the R packages listed below are used to create plots?",
-    answer("lattice", correct = TRUE),
-    answer("tools"),
-    answer("stats"),
-    answer("grid", correct = TRUE)
+  question("How many flavors do day 2 and day 3 have in common?",
+    answer("0"),
+    answer("2", correct = TRUE),
+    answer("3"),
+    answer("7")
   )
 )
 ```
 
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.3: Probability Tree Diagram
 
-### Exercise with Code
+Imagine that you are flipping a magical coin twice. The coin is magical because the first flip is fair, but the second flip is biased. Everytime you get Tails on the first flip, the chance of getting a second Tails increases to 80%, but the second flip remains fair (50/50) when the first flip results in Heads. Let's represent these probabilities as a diagram.
 
-Here's an exercise with some prepopulated code as well as `exercise.lines = 5` to provide a bit more initial room to work.
+A popular package for constructing network graph diagrams is **diagrammeR**. We will use it to find out what is the probability of **(1)** Tails AND Heads (no specific order), and **(2)** Tails on 2nd flip GIVEN it was Tails on the 1st flip.
 
-Now write a function that adds any two numbers and then call it:
-
-```{r add-function, exercise=TRUE, exercise.lines = 5}
-add <- function() {
-  
-}
+```{r prob-tree, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+create_graph() %>% 
+  add_n_nodes(n = 7, 
+              type = "path", 
+              label = c("Start", rep(c("Tails", "Heads"), 3)),
+              node_aes = node_aes(shape = "circle", height = 1, width = 1, 
+                                  x = c(0, 2, 2, 4, 4, 4, 4), y = c(0, 1, -1, 2, .5, -2, -.5), 
+                                  fillcolor = "steelblue", fontsize = 16)) %>% 
+  add_edge(from = 1, to = 2, edge_aes = edge_aes(label = "50%")) %>% 
+  add_edge(from = 1, to = 3, edge_aes = edge_aes(label = "50%")) %>% 
+  add_edge(from = 2, to = 4, edge_aes = edge_aes(label = "80%")) %>% 
+  add_edge(from = 2, to = 5, edge_aes = edge_aes(label = "20%")) %>% 
+  add_edge(from = 3, to = 6, edge_aes = edge_aes(label = "50%")) %>% 
+  add_edge(from = 3, to = 7, edge_aes = edge_aes(label = "50%")) %>% 
+  render_graph()
 ```
+
+To answer both questions, simply follow the path:
+**(1)** P(Tails AND Heads) = P(1st Tails AND 2nd Heads) + P(1st Heads AND 2nd Tails) = .5(.2) + .5(.5) = `r .5 * .2 + .5 * .5`
+**(2)** P(2nd Tails | 1st Tails) = Only look at the top half of the graph = `r .8`
+
+Now it's your turn:
+
+### `r fa("fas fa-book", fill = "#08192B")` MCQ 2.2: Probability Tree Diagram
+
+```{r tree-quiz}
+quiz(
+  question("Find P(2nd Tails | 1st Heads).",
+    answer("0.25"),
+    answer("0.50", correct = TRUE),
+    answer("0.65"),
+    answer("0.80")
+  ),
+  question("Find P(2nd Tails).",
+    answer("0.25"),
+    answer("0.50"),
+    answer("0.65", correct = TRUE),
+    answer("0.80")
+  ),
+  question("Are the 1st and 2nd flip independent?",
+    answer("YES"),
+    answer("NO", correct = TRUE, message = "No, since the 2 probabilities above are not equal .5 <> .65")
+  )
+)
+```
+
+## Lesson 3 & 4
+
+\**Note: This section combines lesson 3 and 4 from the STAT 500 course*
+
+In this section, you will learn how to use R in order to answer probability questions based on data following a Binomial or Normal distribution. Before doing that, let's quickly look at the Central Limit Theorem.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.1: Ice Cream Data
+
+```{r}
+par(mfrow=c(2,2))
+
+# Take 10 samples each of size 100
+sampling_dist_1 <- replicate(10, mean(runif(100))) %>% hist(main = "n = 10")
+
+# Take 30 samples each of size 100
+sampling_dist_2 <- replicate(30, mean(runif(100))) %>% hist(main = "n = 30")
+
+# Take 100 samples each of size 100
+sampling_dist_3 <- replicate(100, mean(runif(100))) %>% hist(main = "n = 100")
+
+# Take 10,000 samples each of size 100
+sampling_dist_4 <- replicate(10000, mean(runif(100))) %>% hist(main = "n = 10,000")
+
+```
+
 
