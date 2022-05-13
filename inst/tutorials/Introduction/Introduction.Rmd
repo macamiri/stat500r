@@ -463,10 +463,10 @@ quiz(
 
 In this section, you will learn how to use R in order to answer probability questions based on data following a Binomial or Normal distribution. Before doing that, let's quickly look at the Central Limit Theorem.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.1: Ice Cream Data
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.1: Central Limit Theorem
 
-```{r}
-par(mfrow=c(2,2))
+```{r central-limit-theorem}
+par(mfrow = c(2, 2))
 
 # Take 10 samples each of size 100
 sampling_dist_1 <- replicate(10, mean(runif(100))) %>% hist(main = "n = 10")
@@ -479,7 +479,323 @@ sampling_dist_3 <- replicate(100, mean(runif(100))) %>% hist(main = "n = 100")
 
 # Take 10,000 samples each of size 100
 sampling_dist_4 <- replicate(10000, mean(runif(100))) %>% hist(main = "n = 10,000")
+```
 
+Notice that the shape of the histogram, in this case of data points randomly sampled from a uniform distribution, approaches the normal distribution as the sample size `n` increases from 10 -> 30 -> 100 -> 10,000. This is what the Central Limit Theorem is about. The same simulation can be repeated by randomly sampling data points from different distributions. To do so in the code above, replace the `runif` function with the random generator function of another distribution. Here are some of the distributions:
+
+- Binomial: `rbinom`
+- Chi-Square: `rchisq`
+- F: `rf`
+- Normal: `rnorm`
+- Poisson: `rpois`
+- Student t: `rt`
+- Uniform: `runif`
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.2: Binomial Distribution
+
+Let's start with the Binomial distrbution to answer the 3 following questions. Assume the data satisfies the 4 conditions of the Binomial:
+
+1) What is the probability of getting exactly 3 Tails when flipping a fair coin 10 times?
+
+```{r binom-dist-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# 3 successes (getting Tails) in 10 trials of tossing a fair (50/50) coin
+# P(X = 3)
+dbinom(x = 3, size = 10, prob = 0.5)
+```
+
+2) What is the probability of getting more than 3 Tails when flipping a fair coin 10 times?
+
+```{r binom-dist-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# pbinom calculates the CDF of the binomial distribution
+# P(X > 3)
+pbinom(q = 3, size = 10, prob = .5, lower.tail = FALSE)
+# OR
+
+# 1 - P(X <= 3)
+1 - pbinom(q = 3, size = 10, prob = .5, lower.tail = TRUE)
+```
+
+3) What are the 17th and 37th quantiles of our fair coin tossing Binomial(10, .5) distribution?
+
+```{r binom-dist-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# P(X <= x17th) and P(X <= x37th)
+qbinom(p = c(.17, .37), size = 10, prob = .5, lower.tail = TRUE)
+```
+
+The output of 3 means that **the probability of getting either 0, 1, 2 or 3 Tails when flipping the coin 10 times** is *17%*. There's an *83%* **probability of getting at least 4 Tails on 10 coin flips**. The same idea follows for the 37th quantile.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.3: Sampling Distribution of the Sample Mean (Normal Population)
+
+The Normal distribution is the cornerstone of many of the statistical testing methods, so it is a good idea to become familiar with the functions for the Normal distribution in R. First, let's tackle the problems where the population we sample from is Normal.
+
+This is a fictional example: The distribution of the weight of Australian sheep is normal with mean of 70 kg and standard deviation of 8.3 kg. Assume this follows a normal distribution. Now, let's answer 3 common problems that you might find on quizzes using R.
+
+1) What is the probability of randomly selecting a sheep that weighs at least 78.3 kg?
+
+```{r norm-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# P(X > 78.3)
+pnorm(q = 78.3, mean = 70, sd = 8.3, lower.tail = FALSE)
+
+# OR
+
+# 1 - P(X < 78.3)
+1 - pnorm(q = 78.3, mean = 70, sd = 8.3, lower.tail = TRUE)
+```
+
+2) What is the probability of randomly selecting a sheep that weighs between 70 kg and 78.3 kg?
+
+```{r norm-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# P(X < 70)
+prob1 <- pnorm(q = 70, mean = 70, sd = 8.3, lower.tail = TRUE)
+
+# P(X < 78.3)
+prob2 <- pnorm(q = 78.3, mean = 70, sd = 8.3, lower.tail = TRUE)
+
+# P(70 < X < 78.3) = P(X < 78.3) - P(X < 70)
+cat(crayon::magenta("The probability is ", round(prob2 - prob1, 3)))
+```
+
+3) If we take a sample of 12 sheeps, what is the probability the mean weight is at least 78.3 kg?
+
+```{r norm-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+sd_12 <- 8.3 / sqrt(12)
+
+# P(X > 78.3)
+pnorm(q = 78.3, mean = 70, sd = sd_12, lower.tail = FALSE)
+```
+
+Notice the difference between the probabilities in Q2 and Q3 above. The reason that the probability in Q3 is smaller than in Q2 is because the standard deviation in Q3 is smaller, which means that there is a lower chance of getting a value further from the mean (78.3).
+
+4) What is the 80th percentile?
+
+```{r norm-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+qnorm(p = .8, mean = 70, sd = 8.3)
 ```
 
 
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.4: Sampling Distribution of the Sample Mean (NOT Normal Population)
+
+Now, assume that there is no indication that the sheep population from the previous section is Normal. Can we answer the same 3 questions? If you have read the notes, you know that our method depended on knowing that the distribution is Normal and in this section we do not make such an assumption.
+
+Instead let's take a sample of size n = 166 sheeps from the population. By the Central Limit Theorem, we can now assume that the sampling distribution of the mean weight of the sheep is Normal with a mean of 70 kg and standard error of 8.3 / sqrt(166) = `r 8.3 / sqrt(166)`
+
+1) What is the probability that the sample mean will be at least 78.3 kg?
+
+```{r clt-norm-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+standard_error <- 8.3 / sqrt(166)
+
+# P(X > 78.3)
+pnorm(q = 78.3, mean = 70, sd = standard_error, lower.tail = FALSE)
+```
+
+2) What is the probability that the sample mean will be between 70 kg and 78.3 kg?
+
+```{r clt-norm-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+standard_error <- 8.3 / sqrt(166)
+
+# P(X < 70)
+prob1 <- pnorm(q = 70, mean = 70, sd = standard_error, lower.tail = TRUE)
+
+# P(X < 78.3)
+prob2 <- pnorm(q = 78.3, mean = 70, sd = standard_error, lower.tail = TRUE)
+
+# P(70 < X < 78.3) = P(X < 78.3) - P(X < 70)
+cat(crayon::magenta("The probability is ", round(prob2 - prob1, 3)))
+```
+
+3) What is the 80th percentile of the sample means of size n = 166?
+
+```{r clt-norm-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+standard_error <- 8.3 / sqrt(166)
+
+qnorm(p = .8, mean = 70, sd = standard_error)
+```
+
+Finally, let's represent both distributions from sections 3.3 and 3.4 graphically using *ggplot2*:
+
+```{r norm-ggplot, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.5: Sampling Distribution of the Sample Proportion
+
+Let's dive straight into this section with 2 questions. Suppose that 65% of restaurants in Pennsylvania have vegan meals on their menu.
+
+1) If a random sample of 40 restaurants were selected, what is the probability that the proportion of the sample that has a vegan meal on their menu is at least 70%? The conditions for the sampling distribution of the sample proportion are satisfied.
+
+```{r prop-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+standard_error <- sqrt(.65 * (1 - .65) / 40)
+
+# P(X > (.7 - .65) / standard_error)
+pnorm(q = .7, mean = .65, sd = standard_error, lower.tail = FALSE)
+```
+
+Therefore, there is a 25.37% chance to get a sample proportion of 70% or higher in a sample size of 40.
+
+2) If a random sample of 100 restaurants were selected, what is the probability that we would find between 70% and 80% of the restaurants serve a vegan meal?
+
+```{r prop-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+standard_error <- sqrt(.65 * (1 - .65) / 100)
+
+# P(X > (.5 - .65) / standard_error)
+prob1 <- pnorm(q = .7, mean = .65, sd = standard_error, lower.tail = TRUE)
+
+# P(X > (.6 - .65) / standard_error)
+prob2 <- pnorm(q = .8, mean = .65, sd = standard_error, lower.tail = TRUE)
+
+# P(prob1 < X < prob2) = P(X < prob2) - P(X < prob1)
+cat(crayon::magenta("The probability is ", round(prob2 - prob1, 4)))
+```
+
+Therefore, there is a 14.64% chance to get a sample proportion between 70% and 80% when the sample size is 100.
+
+As a challenge, try to answer the questions in the course notes using R.
+
+In the next section, we will explore confidence intervals.
+
+## Lesson 5
+
+It's time to talk about statistical inference. In particular, we will be dicussing confidence intervals in R. Remember the general form `r cat(crayon::bold("CI = Point Estimate ± Margin of Error"))`.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.1: Confidence Intervals for Population Proportion (Manual)
+
+The 'Manual' part means that we will be calculating each part separately rather than using a specific function (see Code 5.3).
+
+Let's construct the confidence interval for the following: a random sample of 250 current NBA players and coaches is taken. They are asked whether they think Michael Jordan is the greatest basketball player of all time (i.e., GOAT rating). Of the 250 surveyed, 161 respond with 'yes'. Calculate a 95% confidence interval for the overall GOAT rating of the Michael Jordan.
+
+The conditions are satisfied.
+
+```{r ci-prop, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# point estimate
+pe <- 161 / 250
+
+# alpha / 2
+alpha_2 <- (1 - .95) / 2
+
+# z-value multiplier
+multiplier <- qnorm(p = alpha_2, mean = 0, sd = 1, lower.tail = FALSE)
+
+# standard error
+se <- sqrt(pe * (1 - pe) / 250)
+
+# margin of error
+moe <- multiplier * se
+
+# confidence interval
+lower_bound <- round((pe - moe), 4)
+upper_bound <- round((pe + moe), 4)
+
+# print output
+cat(crayon::magenta("The 95% confidence interval is (", lower_bound, ", ", upper_bound, ")"))
+```
+
+We are 95% confident that between 58.46% and 70.34% of current NBA players and coaches think Michael Jordan is the greatest basketball player of all time.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.2: Confidence Intervals for Population Mean (Manual)
+
+We're going to be constructing the confidence interval only for the case where the population standard deviation is unknown since this is more indicative of real-life (we rarely know the population standard deviation). 
+
+Let's construct the confidence interval for the following: a random sample of 40 flights that depart from Los Angeles International Airport is taken. The average delay in departure time for this sample is 21 minutes and the standard deviation is 7 minutes (i.e., on average, the flights took off 21 minutes after the expected departure time). Calculate a 90% confidence interval for the average departure delay time for the airport.
+
+Since the sample size is 40 > 30, by the Central Limit Theorem, the sampling distribution of the mean departure delay time is approximately normal. We can use te Student t distribution to construct the 90% confidence interval.
+
+```{r mean-prop, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# point estimate
+pe <- 21
+
+# alpha / 2
+alpha_2 <- (1 - .90) / 2
+
+# t-value multiplier
+multiplier <- qt(p = alpha_2, df = 39, lower.tail = FALSE)
+
+# standard error
+se <- 7 / sqrt(40)
+
+# margin of error
+moe <- multiplier * se
+
+# confidence interval
+lower_bound <- round((pe - moe), 2)
+upper_bound <- round((pe + moe), 2)
+
+# print output
+cat(crayon::magenta("The 95% confidence interval is (", lower_bound, ", ", upper_bound, ")"))
+```
+
+We are 95% confident that the mean departure delay time at Los Angeles International Airport is between 19.14 and 22.86 minutes.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.3: Confidence Intervals (`Rmisc` package)
+
+The `CI()` function in the `Rmisc` package constructs the confidence interval in one step, as long as we have the original data. We will quickly generate normal random data with mean of 21 and standard deviation of 7.
+
+```{r ci-rmisc, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load Rmisc package
+library(Rmisc)
+
+# generate random data
+set.seed(500)
+random_data <- rnorm(40, 21, 7)
+
+# construct confidence interval
+CI(x = random_data, ci = .9)
+```
+
+Notice that the confidence interval is similar to the one we constructed manually in Code 5.2. It is not exactly the same since the mean and standard deviations will not be exactly 21 and 7, respectively, when using `rnorm()`.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.4: Checking Normality
+
+Finally, let's see how we can draw the normal probability plot in R to check if the data is normal. We will learn about 2 methods; the second allows for more customizations.
+
+In the following example, we will generate random normal data, then build the plot using `stat_qq()` from *ggplot2*.
+
+```{r check-normality-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# generate normal data
+r_data <- tibble(index = 1:80, 
+                 values = rnorm(n = 80, mean = 50, sd = 5))
+
+# build normal probability plot
+r_data %>% 
+  ggplot(aes(sample = values)) + 
+  stat_qq(color = "steelblue")
+```
+
+Next, we will generate non-normal data (uniform), then build the plot using `ggqqplot()` from *ggpubr*.
+
+```{r check-normality-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load ggpubr
+library(ggpubr)
+
+# generate uniform data
+r_data <- tibble(index = 1:80, 
+                 values = runif(n = 80, min = 35, max = 65))
+
+# build normal probability plot
+r_data %>% 
+  ggqqplot(x = "values", 
+           color = "steelblue", 
+           conf.int = TRUE, 
+           conf.int.level = .9, 
+           ggtheme = theme_pubclean())
+```
+
+Let's repeat the above method, but generate normal data this time and a confidence interval of 99%.
+
+```{r check-normality-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load ggpubr
+library(ggpubr)
+
+# generate uniform data
+r_data <- tibble(index = 1:80, 
+                 values = rnorm(n = 80, mean = 50, sd = 5))
+
+# build normal probability plot
+r_data %>% 
+  ggqqplot(x = "values", 
+           color = "steelblue", 
+           conf.int = TRUE, 
+           conf.int.level = .99, 
+           ggtheme = theme_pubclean())
+```
+
+Notice the wider confidence bounds when we increased the confidence interval to 99%. It is clear from the plots that data from plots 1 and 3 are normal.
