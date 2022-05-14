@@ -775,11 +775,11 @@ r_data %>%
   ggqqplot(x = "values", 
            color = "steelblue", 
            conf.int = TRUE, 
-           conf.int.level = .9, 
+           conf.int.level = .95, 
            ggtheme = theme_pubclean())
 ```
 
-Let's repeat the above method, but generate normal data this time and a confidence interval of 99%.
+Let's repeat the above method with the same 95% confidence interval, but generate normal data this time.
 
 ```{r check-normality-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # load ggpubr
@@ -794,8 +794,186 @@ r_data %>%
   ggqqplot(x = "values", 
            color = "steelblue", 
            conf.int = TRUE, 
-           conf.int.level = .99, 
+           conf.int.level = .95, 
            ggtheme = theme_pubclean())
 ```
 
-Notice the wider confidence bounds when we increased the confidence interval to 99%. It is clear from the plots that data from plots 1 and 3 are normal.
+If we increase the confidence interval to .99, then the confidence bounds will be wider. It is clear from the plots that data from plots 1 and 3 are normal as the data values fall within the bounds.
+
+This ends our discussion on confidence intervals. Next up is hypothesis testing.
+
+## Lesson 6
+
+In this section, we will explore hypothesis testing in R by conducting the tests and drawing graphs to visually highlight what is going on. Be sure to read the course notes from lessons 6a and 6b before moving on with this section. In all the example below, we assume that the conditions are satisfied.
+
+It is a good habit to add comments to your code. You can do so in R via the `#` symbol.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 6.1: Hypothesis Testing for 1 Sample Proportion
+
+Suppose we take a random sample of 200 cereal boxes from a supermarket and find that 112 are red. Can we conclude that the proportion of red cereal boxes is larger than 0.5 at a 10% level of significance?
+
+```{r ht-prop, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: p = .5 vs Ha: p > .5
+
+# alpha = .9
+
+# conduct 1 sample proportion z-test
+prop.test(x = 112, n = 200, p = .5, alternative = "greater", conf.level = .9, correct = FALSE)
+```
+
+Since p-value = .04484 < .1, we can conclude that the proportion of red cereal boxes at the supermarket is larger than 0.5 at a 10% level of significance.
+
+\**Note: To find the z-test statistic, you will need to take the square root of the X-squared statistic that the `prop.test()` function returns. The explanation for this is beyond the scope of this lesson.*
+
+We can also use `prop.test()` to calculate the confidence intervals. Take the same basketball example from Code 5.1 in lesson 5. We found the 95% confidence interval to be (.5846, .7034). Let's use `prop.test()` to verify that we get the same results.
+
+```{r ct-prop-test, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+test_results <- prop.test(x = 161, n = 250, p = .5, alternative = "two.sided", conf.level = .95, correct = FALSE)
+
+test_results$conf.int
+```
+
+Notice that the values are the same to 2 decimal places.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 6.1: Hypothesis Testing for 1 Sample Mean
+
+Say we take a random sample of 200 cereal boxes of the same kind. The manufacturer claims that each box contains 30 grams of cereal. We empty the contents of each box, and find the mean weight of the cereal in the boxes to be 29.3 grams. Based on our measurements, can we reject the manufacturer's hypothesis that each box contains 30 grams of cereal at a 5% significance level?
+
+```{r ht-mean, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: mu = 30 vs Ha: mu ≠ 30
+
+# alpha = .95
+
+# cereal box weights
+set.seed(500)
+cereal <- rnorm(200, mean = 29.3, sd = .8)
+
+# conduct 1 sample mean t-test
+t.test(x = cereal, mu = 30, alternative = "two.sided", conf.level = .95)
+```
+
+Since p-value ~ 0 < .05, we can conclude that the true mean weight of this brand of cereal boxes is not 30 grams as claimed by the manufaturer, at a 5% level of significance.
+
+The confidence interval is (29.17, 19.38), indicating that 30 does not fall within the bounds, so we can reject the manufacturer's claim.
+
+Before moving on to the next section, try running the hypothesis test examples from the course notes in R.
+
+## Lesson 7
+
+Let's move on to a higher data dimension from our previous lesson and compare two population parameters.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.1: Comparing Two Population Proportions
+
+In this case, the data values are categorical and taken from two distinct groups.
+
+Suppose we asked high-school and university students wether they owned an Apple product or not (e.g., iphone, macbook laptop). Of the 166 high school students sampled, 108 said 'yes' and of the 315 university students sampled, 246 said 'yes'.
+
+Does the data indicate that the proportions that said 'yes' (i.e., own an Apple products) are different for high-school and university students at a 5% significance level?
+
+```{r ht-two-prop, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: p1 = p2 vs Ha: p1 ≠ p2
+
+# alpha = .95
+
+# format data in matrix form to input into prop.test
+data_mat <- matrix(c(108, 246, 58, 69), nrow = 2, ncol = 2, byrow = FALSE, dimnames = list(c("HS", "UNI"), c("Yes", "No")))
+
+# conduct hypothesis test
+prop.test(data_mat, alternative = "two.sided", conf.level = .95, correct = FALSE)
+```
+
+Since the p-value = .002 < .05, we conclude that there is enough evidence to suggest that the proportions of high school and university students who own an Apple product are different.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.2: Comparing Two Population Means (Independent)
+
+In this case, the data values are quantitative and taken from two distinct groups.
+
+Say we measured the resting heart rate (RHR) of 53 professional soccer and 55 golf players. It is claimed that the soccer players have a lower RHR than golf athletes. Our measurements are as follows: mean_soccer = 59 beats per minute (bpm) and sd_soccer = 4.6 bpm, while mean_golf = 68 bpm and sd_golf = 6.4 bpm.
+
+Do the measurements provide sufficient evidence to conclude that, on average, professional soccer players have a lower RHR than pro golfers?
+
+```{r ht-two-ind-mean, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: mu_soccer = mu_golf vs Ha: mu_soccer ≠ mu_golf
+
+# alpha = .95
+
+# equal variance?
+equal_var <- ifelse(between(x = 6.2 / 4.6, left = .5, right = 2), yes = TRUE, no = FALSE)
+
+# cereal box weights
+set.seed(500)
+soccer <- rnorm(53, mean = 58, sd = 4.4)
+golf <- rnorm(55, mean = 65, sd = 6.8)
+
+# conduct 1 sample mean t-test
+t.test(x = soccer, y = golf, alternative = "less", conf.level = .95, paired = FALSE, var.equal = equal_var)
+```
+
+The `equal_var` object will returm `TRUE` if the variances can be assumed to be equal, which will in turn run the pooled variance t-test. If one of the variances is greater by a factor of 2 than the other, then `equal_var` object will returm `FALSE`, running the unpooled variance t-test.
+
+Since p-value ~ 0 < .05, we can conclude that the true mean RHR of professional soccer players is lower than that of pro golfers.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.3: Comparing Two Population Means (Paired)
+
+In this case, the data values are quantitative and taken twice from each subject.
+
+Suppose that a group of sport scientists have devised a new workout routine. They claim that anyone who applies their program will see a significant decrease in weight in as little as 4 weeks. To test their claim, 72 subjects were weighed before starting the routine and 4 weeks after.
+
+Do the measurements provide sufficient evidence to conclude that people can lose weight in 4 weeks while on the new workout program?
+
+```{r ht-two-pair-mean, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: mu_before = mu_after vs Ha: mu_before ≠ mu_after
+
+# alpha = .99
+
+# cereal box weights
+set.seed(500)
+before <- runif(n = 72, min = 80, max = 89)
+after <- runif(n = 72, min = 72, max = 85)
+
+# conduct 1 sample mean t-test
+t.test(x = before, y = after, alternative = "two.sided", conf.level = .99, paired = TRUE)
+```
+
+Since p-value ~ 0 < .01, we can conclude that the workout routine is effective for weight loss. Furthermore, we are 99% confident that the true mean weight loss is between 4.07 and 7.40 kg.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.4: Comparing Two Population Variances
+
+Suppose that the statisticians working at a chocolate manufacturer suspects that one of the older machines is no longer producing the desired weight of chocolate in each package consistently. They test their claim by comparing the variance in weight of 100 pieces of chocolate produced by the older machine and a newer one that they know works as desired.
+
+Do the measurements provide sufficient evidence to conclude that the old machine needs to be fixed?
+
+```{r ht-two-var, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: var_old = var_new vs Ha: var_old ≠ var_new
+
+# alpha = .99
+
+# cereal box weights
+set.seed(500)
+old <- runif(n = 100, min = 2.42, max = 2.49)
+new <- runif(n = 100, min = 2.48, max = 2.52)
+
+# conduct 1 sample mean t-test
+var.test(x = old, y = new, alternative = "two.sided", conf.level = .99)
+```
+
+Since p-value ~ 0 < .01, we can conclude that the old machine has a different variance than the newer well-working machine -> the manufacturer will need to fix the old machine in order to produce the desired weight of chocolate consistently.
+
+This concludes our section on cmpaing two population variances. Next, we will discuss how to use the Chi-Squared test when both the response and the explanatory variable are qualitative.
+
+## Lesson 8
+
+Chi squared
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.1: Contingency Table
+
+
+```{r chi-sq, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: p1 = p2 vs Ha: p1 ≠ p2
+
+# alpha = .95
+
+# format data
+
+# conduct hypothesis test
+```
