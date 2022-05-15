@@ -781,7 +781,7 @@ r_data %>%
 
 Let's repeat the above method with the same 95% confidence interval, but generate normal data this time.
 
-```{r check-normality-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+```{r check-normality-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # load ggpubr
 library(ggpubr)
 
@@ -1246,7 +1246,7 @@ plot(model)
 
 Alternatively, to create publication friendly plots it is worth familiarizing yourself with `autoplot()` from *ggfortify*. You can customize the layout of the graphs largely with the `theme()` function.
 
-```{r slr-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+```{r slr-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # build slr model
 model <- lm(formula = mpg ~ hp, data = mtcars)
 
@@ -1266,12 +1266,206 @@ We have reached the end of lesson 9. One more lesson to go.
 
 ## Lesson 10
 
-We're so close to the end! Our final lesson is about ANOVA, one of the most important statistical methods to have in your toolbox.
+We're so close to the end! Our final lesson is about ANOVA, one of the most important statistical methods to have in your toolbox. As we did with SLR, we will learn how to conduct one way anova and check for the conditions. We will end by running post-hoc tests.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.1: One Way ANOVA
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.1: Data Preparation
 
-To start...
+Let's explore a new dataset from the *grocerycart* package: `eg_data` contains information on 15,000+ grocery products from over 100 stores. One of the stores, 'Grandiose', has multiple locations. Say that 'Grandiose' has hired you to analyze whether the average amount spent at their 3 largest stores (i.e., stores with the most products) is different. In other words, **H0: mean 1 = mean 2 = mean 3** and **Ha: at least one of the means is different**.
+
+To prepare the data for ANOVA, we will `filter()` the table to extract 'Grandiose' products, then `slice_max()` the 3 largest stores. Finally, we will use the names of the 3 stores to `left_join()` to the original dataset.
 
 ```{r anova-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price)
 
+# mean of each store
+grandiose %>% 
+  group_by(store_name) %>% 
+  summarise(size = n(), 
+            mean = mean(price), 
+            variance = var(price))
 ```
+
+Before running ANOVA, let's visualize the data with a boxplot and overlaying the points with `geom_quasirandom()`:
+
+```{r anova-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price)
+
+# boxplot with data points
+grandiose %>% 
+  ggplot(aes(x = store_name, y = price, color = store_name)) + 
+  geom_boxplot() +
+  ggbeeswarm::geom_quasirandom(alpha = .6, size = 2) + 
+  labs(x = "Store", y = "Price", title = ("Products Prices:\nTop 3 Grandiose Stores")) +
+  hrbrthemes::theme_ipsum(grid = "Y") + 
+  scale_color_brewer(palette = "Dark2") + 
+  coord_cartesian(ylim = c(0, 15)) + # this cuts the y-axis range, but we do not care about outliers yet
+  theme(legend.position = "none")
+```
+
+At a quick glance, we can see the products in **Grandiose Hypermarket Abu Dhabi** are the most expensive on average, but is the difference big enough to conclude a statistical significance? Let's find out.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.2: ANOVA
+
+Time to finally conduct ANOVA in R:
+
+```{r anova-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price)
+
+# anova
+aov(price ~ store_name, data = grandiose) %>% 
+  summary()
+```
+
+Since the p-value ~ 0, we can conclude that at least one of the means is diffirent. However, can we trust this result? Let's check the ANOVA assumptions.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.3: ANOVA Assumptions
+
+Firstly, the data is independent.
+
+Secondly, is the normality assumption satisfied? Let's plot the residuals to check. By drawing a histogram for the model's residuals, we can see that the shape is right tailed. However, since (1) ANOVA is fairly robust against violations of the normality assumption and (2) the sample size for each store/group is very large ---> we might be able to assume that the normal assumption holds.
+
+In a real life setting, it might be better to also conduct a non-parametric test such as a Kruskal-Wallis Test (does not require the normality assumption) and compare the results. Alternatively, we can transform the response variable (price) to acheive a more normal distribution. For our case, we will assume that the normality assumption is satisfied.
+
+Ok, let's now vizualize the histogram:
+
+```{r anova-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price)
+
+# anova
+model_aov <- aov(price ~ store_name, data = grandiose)
+
+# residual histogram to visually check for normality
+hist(model_aov$residuals)
+```
+
+Finally, we check if the variances are equal across the stores or not. A boxplot is great quick way to check for homogeneity of variances Also, we will run a formal test using `leveneTest()`. Levene's test was briefly mentioned in lesson 7 of the course notes.
+
+```{r anova-five, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price)
+
+# Levene's test
+# Ho: variances are equal and Ha: at least one variance is different
+library(car)
+lev_tes <- leveneTest(price ~ store_name, data = grandiose)
+
+# boxplot with data points
+grandiose %>% 
+  ggplot(aes(x = store_name, y = price, color = store_name)) + 
+  geom_boxplot() +
+  labs(x = "Store", y = "Price", 
+       title = "Boxplot", 
+       subtitle = str_glue("Levene's Test p-value ~ {round(lev_tes$`Pr(>F)`[[1]], 2)}")) +
+  ggpubr::theme_pubclean() + 
+  scale_color_brewer(palette = "Dark2") + 
+  theme(legend.position = "none")
+```
+
+Since p-value for Levene's test is ~ 0, we can conclude that the variances are not equal. In this case, a Welch ANOVA would be more appropriate, but we will continue our example assuming the homogeneity of variances is satisfied.
+
+Also, it's a good idea to explore any potential outliers. This is out of scope of this course and tutorial so we will assume we do not have any major outliers.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.3: Post-hoc Tests
+
+Remeber that our ANOVA returned a significant result (see Code 10.1). How can we see which groups are different from each other? Post-hoc tests allow us to run multiple comparisons of all pairwise means:
+- Grandiose Barsha vs Grandiose Hypermarket Abu Dhabi
+- Grandiose Barsha vs Grandiose Jumeirah
+- GGrandiose Hypermarket Abu Dhabi vs Grandiose Jumeirah
+
+Let's rename the 3 stores so as to save space when we plot the confident intervals soon. We can do this with ``
+
+To stay consistent with the course notes, we will run the Tukey HSD post-hoc test:
+
+```{r anova-six, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price) %>% 
+  mutate(store_name = fct_recode(store_name, 
+                                 Barsha = "Grandiose - Barsha", 
+                                 AbuDhabi = "Grandiose Hypermarket Abu Dhabi", 
+                                 Jumeirah = "Grandiose Jumeirah"))
+
+# anova
+model_aov <- aov(price ~ store_name, data = grandiose)
+
+# tukey post-hoc test
+TukeyHSD(model_aov, "store_name", ordered = TRUE, conf.level = 0.95)
+```
+
+The output indicates that all stores are significantly different in terms of basket price (since adjusted p-value is ~ 0 for all pairwise comparisons).
+
+Let's visualize the confident intervals for the differences. The only difference between the 2 code examples in this section is the use of `plot()` below:
+
+```{r anova-seven, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price) %>% 
+  mutate(store_name = fct_recode(store_name, 
+                                 Barsha = "Grandiose - Barsha", 
+                                 AbuDhabi = "Grandiose Hypermarket Abu Dhabi", 
+                                 Jumeirah = "Grandiose Jumeirah"))
+
+# anova
+model_aov <- aov(price ~ store_name, data = grandiose)
+
+# plot tukey post-hoc test CI
+TukeyHSD(model_aov, "store_name", ordered = TRUE, conf.level = 0.95) %>% 
+  plot(xlim = c(-1, 3))
+```
+
+All 3 confidence intervals do not contain 0. We can conclude that the **Abu Dhabi** location has the highest product price mean, followed by **Barsha** then **Jumeirah**.
+
+We have reached the end of this lesson.
+
+## Lesson 00: End
+
+Congratulations! You have made it to the end of this tutorial and course. Good luck on your final exam. 
+
+### what next?
+### edit aesthetics (dark code blocks, color headings)
+
+Remember that you can always visit this tutorial by running the following command in your R console: `learnr::run_tutorial("introduction", "stat500r")`
