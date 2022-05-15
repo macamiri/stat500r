@@ -959,21 +959,319 @@ var.test(x = old, y = new, alternative = "two.sided", conf.level = .99)
 
 Since p-value ~ 0 < .01, we can conclude that the old machine has a different variance than the newer well-working machine -> the manufacturer will need to fix the old machine in order to produce the desired weight of chocolate consistently.
 
-This concludes our section on cmpaing two population variances. Next, we will discuss how to use the Chi-Squared test when both the response and the explanatory variable are qualitative.
+This concludes our section on cmpaing two population variances. Next, we will discuss how to use the Chi-Square test when both the response and the explanatory variable are qualitative.
 
 ## Lesson 8
 
-Chi squared
+How can we test if two categorical variables are dependent? Enter the Chi-Square Test of Independence. First, let's take a look at contingency tables in R.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.1: Contingency Table
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 8.1: Contingency Table
+
+We touched on proportion tables in lesson 1, but we will dive deeper in this section.
+
+Let's start by creating a table for the 2 categorical variables **payment_method** (3 levels) and **household_size** (7 levels) from our **grocery_table** data. The contingency table will be 3 by 7.
+
+```{r cont-table-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+with(grocery_table, table(payment_method, household_size))
+```
+
+We can add the total margins with `add_margins()`.
+
+```{r cont-table-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+with(grocery_table, table(payment_method, household_size)) %>% 
+  addmargins()
+```
+
+Next, let's visualize the table the relationship between **payment_method** and **household_size** with 3 barplots and a mosaic plot.
+
+The stacked bar chart below shows that online payment was the most popular method across all household sizes. Cash payment was the least popular for all household sizes.
+
+```{r cont-table-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Stacked bar chart
+grocery_table %>% 
+  ggplot(aes(x = household_size, fill = payment_method)) + 
+  geom_bar(position = "stack") + 
+  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred\nby Household Size") + 
+  scale_fill_viridis_d(direction = -1, guide = guide_legend(title = "Payment")) + 
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = "bottom")
+```
+
+We can represent the same information, but with the bars next to each other. Simply change the argument for `position` to `"dodge"`.
+
+```{r cont-table-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Bar chart
+grocery_table %>% 
+  ggplot(aes(x = household_size, fill = payment_method)) + 
+  geom_bar(position = "dodge") + 
+  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred\nby Household Size") + 
+  scale_fill_viridis_d(direction = -1, guide = guide_legend(title = "Payment")) + 
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = "bottom")
+```
+
+What if you want to group the bars by each payment method? This is where `facet_wrap()` will help us acheive that goal. Again, it's clear that online payment is the most popular method. We can also note that households with 2 individuals are ordering the most.
+
+```{r cont-table-five, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Bar chart - seperated by payment method
+grocery_table %>% 
+  ggplot(aes(x = household_size, fill = household_size)) + 
+  geom_bar(position = "dodge") + 
+  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred\nby Household Size") + 
+  scale_fill_viridis_d(direction = 1, guide = guide_legend(title = "Payment")) + 
+  ggpubr::theme_pubclean() + 
+  facet_wrap(~ payment_method) + 
+  theme(legend.position = "bottom")
+```
+
+Each 'block' of the mosaic plot tells us 2 pieces of info: (1) the vertically longer the block, the more orders used the payment method on the left, and (2) the horizontally wider the block, the more common the household size on the bottom. In this case, the width of the blocks above household size of 7 reflect that only the fewest orders were placed by households of size 7. Online payment was the longest for every household size, reflecting that it was the most popular method across all household sizes.
+
+```{r cont-table-six, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load ggmosaic
+library(ggmosaic)
+
+# Mosaic plot
+grocery_table %>% 
+  ggplot() + 
+  geom_mosaic(aes(x = product(payment_method, household_size), fill = household_size)) + 
+  scale_fill_viridis_d(direction = 1, guide = guide_legend(title = "Payment")) + 
+  ggpubr::theme_pubclean() + 
+  theme(legend.position = "bottom")
+```
+
+The 4 graphs above more or less tell the same story, and they can all be further customized to suit your needs.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 8.2: Chi-Square Test
+
+Fianlly, let's test whether household size and payment method are dependent. Since both variables are categorical, we can run a chi-square test. Here's how to do it in R:
+
+```{r chi-square-test-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# Ho: payment method and household size are independent
+# Ha: payment method and household size are related 
+
+# contingency table format to pass on to chisq.test
+contingency_table <- with(grocery_table, table(payment_method, household_size))
+
+# conduct chi-square test
+chisq.test(contingency_table)
+```
+
+Since p-value = .2248 > .05, we can conclude that the variables are independent.
+
+To extract a specific output, use the `$` symbol as such:
+
+```{r chi-square-test-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# contingency table format to pass on to chisq.test
+contingency_table <- with(grocery_table, table(payment_method, household_size))
+
+# conduct chi-square test
+chi_output <- chisq.test(contingency_table)
+
+# chi_output$p.value
+# chi_output$expected
+
+# print all the items in the output, which is a list
+chi_output %>% 
+  map(~ print(.))
+```
+
+Finally, how much a cell contributes to the total chi-square score is calculated as follows:
+
+```{r chi-square-test-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# contingency table format to pass on to chisq.test
+contingency_table <- with(grocery_table, table(payment_method, household_size))
+
+# conduct chi-square test
+chi_output <- chisq.test(contingency_table)
+
+# contribution as a %
+100 * (chi_output$residuals ^ 2) / chi_output$statistic
+```
+
+The cell **Credit Card on delivery** and **7** contributes the most (47%) to the chi-square score.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 8.3: Final Plot
+
+Before wrapping up this lesson, let's create 1 more plot:
+
+```{r cont-table-seven, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# library(ggstatsplot)
+
+# plot
+grocery_table %>% 
+  ggstatsplot::ggbarstats(x = payment_method, y = household_size) + 
+  labs(caption = NULL) + 
+  scale_fill_viridis_d() + 
+  theme(legend.position = "bottom")
+```
+
+This concludes lesson 8. Coming up next is linear regression.
+
+## Lesson 9
+
+In this penultimate lesson we will explore correlation and simple linear regression. When the response and explanatory variables are quantitative, a good place to start is to analyze the linear relationship between the variables.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.1: Correlation Coefficients
+
+We will use the built-in dataset `mtcars` to analyze the correlation between the quantitative variables. The `cor()` function can be used to calculate the correlation coefficient; however, we want to also be able to visualize the relationship all in one scoop. We can do so with `ggpairs()` from the *GGally* package:
+
+```{r cor-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+library(GGally)
+
+mtcars %>% 
+  select(mpg, hp, disp, drat, wt, qsec) %>% 
+  ggpairs()
+```
+
+There's a lot going on in the diagram above, but if you read the course notes for lesson 9, then you will be able to interpret the output in a few minutes.
+
+For our next visualization, we are going to construct a correlation matrix with `corrplot()` from the *corrplot* package:
+
+```{r cor-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+library(corrplot)
+
+mtcars %>% 
+  select(mpg, hp, disp, drat, wt, qsec) %>% 
+  cor() %>% 
+  corrplot(method = "number", type = "upper", bg = "black", diag = FALSE, 
+           title = "Correlation Matrix for mtcars")
+```
+
+Our third and final visualization will be the simplest out of the three: scatter plot for 2 quantitative variables.
+
+```{r cor-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+mtcars %>% 
+  ggplot(aes(x = mpg, y = hp)) + 
+  geom_point()
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.2: Correlation Test
+
+Let's run a correlation test between **mpg** and **hp**.
+
+```{r cor-test-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+with(mtcars, cor.test(mpg, hp))
+```
+
+We can also run several correlation tests at once with `rcorr()` from *Hmisc*.
+
+```{r cor-test-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+library(Hmisc)
+
+# matrix form since rcorr() needs matrix as input
+data <- 
+  mtcars %>% 
+  select(mpg, hp, disp, drat, wt, qsec) %>% 
+  as.matrix()
+
+# display p-values (rounded to 3 decimals)
+rcorr(data)
+```
 
 
-```{r chi-sq, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# Ho: p1 = p2 vs Ha: p1 ≠ p2
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.3: Correlation
 
-# alpha = .95
+Let's combine the ideas of correlation coefficients and tests in a visualization:
 
-# format data
+```{r cor-test-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+library(ggstatsplot)
+library(ggside)
 
-# conduct hypothesis test
+# plot
+mtcars %>% 
+  ggscatterstats(x = mpg, y = hp) + 
+  labs(caption = NULL) + 
+  scale_fill_viridis_d() + 
+  theme(legend.position = "bottom")
+```
+
+Can we combine the two ideas for many variables at once, as we did with the correlation tests in the previous section? Absolutely! We can do that with `correlation()` from the *correlation* package:
+
+```{r cor-test-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+library(correlation)
+
+# correlation matrix
+mtcars %>% 
+  select(mpg, hp, disp, drat, wt, qsec) %>% 
+  correlation(include_factors = TRUE)
+```
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.4: Simple Linear Regression
+
+Since we are nearing the end of this lesson (and tutorial as a whole), let's analyze a full SLR with a publication worthy visualization.
+
+Suppose we want to study the relationship between **mpg** and **hp**, specifically we want to know how **mpg** changes as **hp** increases by 1 unit. Let's build the SLR model then check the diagnostic plots to see if the 4 conditions for SLR are satisfied. 
+
+Each one of the code example below will build on the previous one, starting with this:
+
+```{r slr-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+lm(formula = mpg ~ hp, data = mtcars) %>% 
+  summary()
+```
+
+Focus your attention on the coefficients part of the output: `r cat(crayon::bold("mpg = -.06823 * hp + 30.09886"))`. This means that on average, as horse power increases by 1 unit, the car's miles per gallon decreases by .068.
+
+You can extract specific parts of the output such as the residuals by (1) assigning the `lm()` output to a variable, then (2) using `$` to extract the part you want.
+
+Let's now draw the regression plot:
+
+```{r slr-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# build slr model
+model <- lm(formula = mpg ~ hp, data = mtcars) %>% summary()
+
+# regression plot
+mtcars %>% 
+  ggplot(aes(x = hp, y = mpg)) + 
+  geom_point(shape = 21) + 
+  geom_smooth(method = lm,  color = "steelblue") + 
+  labs(x = "Horse Power (hp)", y = "Miles per Hour (mpg)", 
+       title = "MPG vs HP Regression", 
+       subtitle = str_glue("mpg = {round(model$coefficients[[2]], 3)}*hp + {round(model$coefficients[[1]],2)}, R-Squared = {round(model$r.squared, 2)}"), 
+       caption = "Data: mtcars in R") + 
+  hrbrthemes::theme_ipsum()
+```
+
+Can we trust these results? We need to draw the diagnostic plots to check if the SLR conditions are satisfied. The basic way of doing this is via `plot()`.
+
+```{r slr-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# build slr model
+model <- lm(formula = mpg ~ hp, data = mtcars)
+
+# adjust how the 4 graphs are presented
+par(mfrow = c(2, 2))
+
+# plot the 4 graphs at once
+plot(model)
+```
+
+Alternatively, to create publication friendly plots it is worth familiarizing yourself with `autoplot()` from *ggfortify*. You can customize the layout of the graphs largely with the `theme()` function.
+
+```{r slr-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# build slr model
+model <- lm(formula = mpg ~ hp, data = mtcars)
+
+# 4 regression diagnostic plots
+library(ggfortify)
+
+autoplot(model, color = "steelblue", shape = 21, label.repel = TRUE) + 
+  ggthemes::theme_economist_white() + 
+  theme(text = element_text(family = "Bebas Neue")) # changes the title + axis labels to the Bebas Neue font
+```
+
+The points with labels (e.g., 'Maserati Bora') are potential outliers/leverage points. So, what do you think? Are the SLR conditions satisfied for our example?
+
+We have reached the end of lesson 9. One more lesson to go.
+
+
+
+## Lesson 10
+
+We're so close to the end! Our final lesson is about ANOVA, one of the most important statistical methods to have in your toolbox.
+
+### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.1: One Way ANOVA
+
+To start...
+
+```{r anova-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+
 ```
