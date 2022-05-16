@@ -50,18 +50,18 @@ knitr::include_graphics("images/introduction-background.jpg")
 ```
 
 In this tutorial, we'll start our journey of applying statistical methods in R. The lessons
-are inspired by [PennState's STAT 500: Applied Statistics course](https://online.stat.psu.edu/stat500/). 
+are inspired by [Penn State's STAT 500: Applied Statistics course](https://online.stat.psu.edu/stat500/). 
 
-This **tutorial assumes** you have **(1)** R or RStudio installed, **(2)** basic understanding of R (eg., how to load packages), and **(3)** sufficient knowledge of the material presented in STAT 500. This tutorial is suited for anyone who is interested in applying the concepts from STAT 500 in R (we do not re-explain the concepts taught in STAT 500).
+This **tutorial assumes** you have **(1)** R/RStudio installed, **(2)** basic understanding of R (eg., how to load packages), and **(3)** sufficient knowledge of the material presented in STAT 500. This tutorial is suited for anyone who is interested in applying the concepts from a standard statistics course in R (we do not re-explain the concepts here).
 
-Each section in this tutorial is associated with the same numbered lesson from the course. As you make your way, you will come across *code examples* and a few *multiple choice questions*. 
+Each section in this tutorial is associated with the same numbered lesson from the STAT 500 course. As you make your way, you will come across *code examples* and a few *multiple choice questions*. 
 
 ### `r fa("fas fa-lightbulb")` = Example code
 
 Keep an eye out for the lightbulb icon in the header for code examples. The examples contain pre-written, working code 
-that you can run by clicking on the blue 'Run Code' button in the upper right. In the event that you update the code and get an error message, just click on ‘Start Over’ in the upper left to automatically reset the code to the default.
+that you can run by clicking on the blue **Run Code** button in the upper right. In the event that you update the code and get an error message, just click on **Start Over** in the upper left corner to automatically reset the code to the default.
 
-This code example calculates the mean for 1, 2, 3, 4 and 5. Try running the code:
+This code example calculates the mean for 1, 2, 3, 4 and 5. Try running the code below (output should be 3(. Then, change the 5 to a 4 and run the code again (new output is 2.5).
 
 ```{r code-example, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 mean(1:5)
@@ -71,7 +71,7 @@ mean(1:5)
 
 The (skippable) multiple choice questions follow the book icon. The questions are based on the concepts presented in the course, and may have multiple correct answers.
 
-Here is an example. Submit your answer:
+Here is a simple example. Submit your answer:
 
 ```{r mcq-example, echo = FALSE}
 question("What is another word for 'average'?",
@@ -83,10 +83,11 @@ question("What is another word for 'average'?",
 ```
 
 ### Meet the data
-We will be working with grocery data for the entirety of this tutorial, so it's a good
+
+We will be working with the following grocery data for a big part of this tutorial, so it's a good
 idea to get familiar with it. Here's what you need to know for now:
 
-**Data source:** The data is a part of an R package I built for scraping 2 online grocery websites. It was simulated with the help of other R packages. Note that the variables are NOT based on true/'real-life' people/orders. If interested, you can learn more about the [grocerycart package on Github](https://github.com/moamiristat/grocerycart).
+**Data source:** The data is part of an R package that I created by scraping 2 online grocery websites. It was simulated with the help of other R packages. Note that the variables are NOT based on true/'real-life' people/orders. If interested, you can learn more about the [grocerycart package on Github](https://github.com/moamiristat/grocerycart).
 
 **Variables:**
 
@@ -107,18 +108,17 @@ grocery_data %>%
   slice_head(n = 10)
 ```
 
-We are finally ready to start with Lesson 1 and explore the data in R! 
-
+We are finally ready to start with Lesson 1 and statistically explore data in R! 
 
 ## Lesson 1
 
-For our first lesson, we'll learn about several R functions to summarize data and start getting familiar with the tidyverse.
+For our first lesson, we'll (1) learn about several R functions that are used to summarize data, and (2) start getting familiar with the **tidyverse**.
 
 ### `r fa("fas fa-lightbulb")` Code 1.1: Sample
 
-Let's take a sample of 5 customer names without replacement from our grocery data frame. We can do so using [`sample()`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample). Press 'Run Code' to sample.
+Let's take a sample of 5 customer names without replacement from our grocery data frame. We can do so by using [`sample()`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample). Press 'Run Code' to sample. You will get a new sample each time you run the code.
 
-\**Note: To get a reproducible outcome (the same outcome every time you run the code), simply use the `set.seed()` function before sampling. `set.seed()` somewhat controls for the random part of the sampling.*
+\**Note: To get a reproducible outcome (the same outcome every time you run the code), simply use the `set.seed()` function before sampling. `set.seed()` somewhat controls for the 'randomness' of the random part of the sampling.*
 
 ```{r sample, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # set.seed(123)
@@ -145,17 +145,17 @@ grocery_table %>%
   mutate(prop = scales::percent(freq / sum(freq)))
 ```
 
-\**Note: To learn more about what each function does, use `?`. For example, run `?mutate` in your R/RStudio environment.*
+\**Note: To learn more about what each function does, write `?` before the function name. For example, run `?mutate` in your R/RStudio environment.*
 
 ### `r fa("fas fa-lightbulb")` Code 1.3: Pie Chart
 
 While there is a quick way to create a pie chart with the `pie()` function, we will dive into another part of the tidyverse: **ggplot2** is the premier data visualization package in R.
 
-It follows a simple idea of building visualization layers on top of each other with the `+` operator as you will see below. This means that the order in which you add the functions/layers matter when building plots using **ggplot2**.
+It follows a simple idea of building visualization layers on top of each other with the `+` operator as you will see below. This means that the order in which you add the functions/layers matters when building plots using **ggplot2**.
 
-Before building our pie chart, we will need to do some data prep. First, we will count the absolute (#) and relative (%) frequency of each payment method. Then, build the pie chart for the payment methods.
+Before building our pie chart, we will need to do some data prep. We need to count the absolute (#) and relative (%) frequency of each payment method.
 
-Notice the assignment ` <- ` operator. It is used to save (aka, assign) the results of some piece of code to some variable. Let's see everything in action below. Remember that you do not need to memorize the functions. Whenever you need help, just type `?*function name*` to remind yourself of the functions.
+Notice the assignment ` <- ` operator. It is used to save (i.e., assign) the results of some piece of code to some variable. Let's see everything in action below. Remember that you do not need to memorize the functions. Whenever you need help, just type `?*function name*` to remind yourself of the functions.
 
 - `ggplot()`: Initializes a ggplot object
 - `geom_col()`: Builds bar charts
@@ -167,11 +167,13 @@ Notice the assignment ` <- ` operator. It is used to save (aka, assign) the resu
 - `theme()`: Adjusts theme
 
 ```{r pie-chart, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# data prep - count frequency of each payment method
 grocery_pie <- 
   grocery_table %>% 
   count(payment_method, name = "freq") %>% 
   mutate(prop = scales::percent(freq / sum(freq)))
 
+# draw pie chart using geom_col and coord_polar
 grocery_pie %>% 
   ggplot(aes(x = "", y = freq, fill = payment_method)) + 
   geom_col() + 
@@ -183,11 +185,11 @@ grocery_pie %>%
   theme(legend.position = "none")
 ```
 
-Remeber how **ggplot2** builds visualization layers on top of each other? In the example above, move `theme_void()` to the end and notice how the plot updates. Keep in mind that you do not need to memorize in what order to write the functions; with more practice you'll have a better understanding of what each layer does.
+Do you recall that **ggplot2** builds visualization layers on top of each other? In the code example above, move `theme_void()` to the end and notice how the plot changes Keep in mind that you do not need to memorize in what order to write the functions; with more practice you'll have a better understanding of what each layer does.
 
 ### `r fa("fas fa-lightbulb")` Code 1.4: Bar Chart
 
-Next up is the bar chart. Let's summarize the same data from Code 1.3 in the form of a bar chart. If you followed the pie chart example, then the bar chart will be a breeze. The `geom_col()` function is what builds the bar chart.
+Next up is the bar chart. Let's summarize the same data from Code 1.3 in the form of a bar chart. If you followed the pie chart example, then the bar chart will be a breeze. The `geom_bar()` function is what we need to build the bar chart.
 
 ```{r bar-chart, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 grocery_table %>% 
@@ -204,13 +206,13 @@ Next, we will summarize a quantitative variable.
 
 ### `r fa("fas fa-lightbulb")` Code 1.5: Central Tendency
 
-To find the mean and median in R is super easy, simply use `mean()` and `median()`. Meanwhile, base R does not have a function for mode, so we will need to create our own function to compute mode. This will be worth seeing if you've never defined a function before.
+To find the mean and median in R is super easy, simply use `mean()` and `median()`. Meanwhile, base R does not have a function for mode, so we will need to create our own function to compute the mode. This will be worth seeing if you've never defined a function before.
 
-Let's practice using `dplyr()` with the ` %>% ` operator by computing the measures of central tendency for the *cost* variable. First we define our mode function.
+Let's practice using **dplyr** with the pipe ` %>% ` operator by computing the measures of central tendency for the *cost* variable. First, we will define our mode function.
 
-Before we even go there, do you know what a *function* is? It has a similar meaning to functions in Mathematics. You input some values into the arguments (think of them as variables), then the function produces an output. That's it.
+Before we do that, do you know what a *function* is? It has a similar meaning to functions in Mathematics. You input some values into the arguments (think of them as variables), then the function produces an output. That's it.
 
-The `function()` command lets R know that you are about to define a function. The arguments/inputs of the function are inserted between the `()`. Finally, the body of the function goes inside the curly brackets `{}`. An example will make things clear. Let's start by building a basic sum function, then our mode function.
+The `function()` command lets R know that you are about to define a function. The arguments/inputs of the function are inserted between the `()`. Finally, the body of the function goes inside the curly brackets `{}`. An example will make things clear. Let's start by building a basic sum function, followed by a mode function.
 
 ```{r addition-function, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 addition <- function(first_num, second_num) {
@@ -222,9 +224,9 @@ addition <- function(first_num, second_num) {
 addition(first_num = 1, second_num = 3)
 ```
 
-We called our function *addition* and will need to type it followed by *()* every time we want to invoke it. The arguments first_num and second_num are the variables where we include our inputs. Check out this blogpost for more on defining functions in R.
+We called our function *addition* and will need to type it followed by *()* every time we want to invoke it. The arguments first_num and second_num are the variables where we include our inputs. Change the numbers 1 and 3 and re-run the code.
 
-Now, let's define our mode function. Alternatively, you can use the `Mode()` function in the `DescTools` package. Then, we will summarise the *cost* variable.
+Now, let's define a mode function and summarise the *cost* variable.
 
 ```{r central-tendency, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 stat_mode <- function(x) {
@@ -239,13 +241,17 @@ grocery_table %>%
             most_freq = stat_mode(cost))
 ```
 
+Alternatively, you can use the `Mode()` function in the `DescTools` package.
+
 ### `r fa("fas fa-lightbulb")` Code 1.6: Position
 
-To find any percentile, simply use the `quantile()` function. Let's find the 20, 25, 50, 75 and 99th percentile of the *cost* variable. Notice that the 50th percentile = median from Code 1.5.
+To find any percentile, simply use `quantile()` Let's find the 20, 25, 50, 75 and 99th percentile of the *cost* variable.
 
 ```{r quantiles, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 quantile(grocery_table$cost, probs = c(.2, .25, .5, .75, .99))
 ```
+
+Notice that the 50th percentile = median from Code 1.5.
 
 ### `r fa("fas fa-lightbulb")` Code 1.7: 5 Number Summary
 
@@ -257,7 +263,7 @@ summary(grocery_table$cost)
 
 ### `r fa("fas fa-lightbulb")` Code 1.8: Dotplot
 
-Let's create a dotplot using **ggplot2**. Let's take this chance to learn another useful function `filter()`. We will use to draw a dotplot to show the distribution of customer age for households of size 3.
+Let's create a dotplot using **ggplot2**. Let's take this opportunity to learn another useful function `filter()`. We will draw a dotplot to show the distribution of customer age only for households of size 3.
 
 ```{r dotplot, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 grocery_table %>% 
@@ -320,11 +326,13 @@ grocery_table %>%
   ggplot(aes(y = cost, col = payment_method)) + 
   geom_boxplot(fill = NA) + 
   facet_wrap(~ payment_method) + 
-  viridis::scale_color_viridis(discrete = TRUE) + 
+  viridis::scale_color_viridis(discrete = TRUE, end = .85) + 
   labs(y = "Price") + 
   scale_x_continuous(breaks = NULL) + 
   theme(legend.position = "none")
 ```
+
+This is the end of our first lesson!
 
 ## Lesson 2
 
