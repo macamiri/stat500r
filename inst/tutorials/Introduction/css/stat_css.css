@@ -1,0 +1,104 @@
+body {
+  background-color: #ffffff;
+  color: #000000;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 18;
+}
+
+em {
+    font-family: 'Source Sans Pro', sans-serif;
+    color: slategrey;
+}
+
+.ace-tm {
+    background-color: #ffffff;
+    color: #08192B;
+}
+
+.panel, pre {
+    border-radius: 0;
+    border-color: #BFCBD6;
+    background-color: #ffffff;
+}
+
+h2 {
+  color: #2C4764;
+  font-family: 'Roboto Slab', serif;
+}
+
+h3 {
+  color: #2C4764;
+  font-family: 'Zen Loop', serif;
+}
+
+h4 {
+  color: #2C4764;
+  font-family: 'Roboto Slab', serif;
+}
+
+h5 {
+    color: darkorange;
+    background-color: white;
+    display: inline-block;
+    font-family: 'Roboto Slab', serif;
+    font-size: 16px;
+}
+
+code {
+    font-family: 'Roboto Mono', monospace;
+    color: DimGray;
+    background-color: #DBECFF;
+    font-size: 18;
+}
+
+.panel-default > .panel-heading {
+    color: white;
+    background-color: #2C4764;
+    border-color: #EBEBEB;
+}
+
+.topicsList .topic {
+    font-family: 'Roboto Slab', serif;
+    line-height: 40px;
+    font-size: 15px;
+    padding-left: 10px;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: 2px 80px;
+    background-position: left 100%;
+        background-position-y: 100%;
+    border-bottom: 1px solid teal;
+    -webkit-transition-property: background-position;
+    transition-property: background-position;
+    -webkit-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
+
+.topicsList .topic.current {
+    font-family: 'Roboto Slab', serif;
+    background-color: #08192B;
+    color: #ffffff;
+    border: 0px;
+}
+
+.btn-primary, .btn-success, .btn-info {
+    font-family: 'Roboto Slab', serif;
+    color: #ffffff;
+    background-color: #5388C1;
+    background-image: none;
+    border: none;
+}
+
+.btn-default {
+    font-family: 'Roboto Slab', serif;
+    color: #ffffff;
+    background-color: #90A1B2;
+    background-image: none;
+    border: none;
+}
+
+a {
+    font-family: 'Source Sans Pro', sans-serif;
+    color: #5388C1;
+    text-decoration: none;
+}
