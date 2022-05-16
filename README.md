@@ -14,7 +14,7 @@ The topics covered include, but are not limited to:
 - Exploring the **tidyverse**.  
 - And more…  
 
-**A live version of the tutorial can be run with the following commands in your R console**:  
+**A live version of the tutorial can be run with the following commands in your R console** (it opens the tutorial in a new tab in your default web browser):  
 `install.packages("remotes")`  
 `remotes::install_github("moamiristat/stat500r")`  
 `learnr::run_tutorial("Introduction", "stat500r")`  
