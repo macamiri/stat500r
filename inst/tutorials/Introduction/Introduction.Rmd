@@ -39,7 +39,7 @@ grocery_table %>%
   summarise(mean(cost), sd(cost), n())
 
 # Global code chunk options
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 
 ```
 
@@ -52,13 +52,11 @@ knitr::include_graphics("images/introduction-background.jpg")
 In this tutorial, we'll start our journey of applying statistical methods in R. The lessons
 are inspired by [PennState's STAT 500: Applied Statistics course](https://online.stat.psu.edu/stat500/). 
 
-This **tutorial assumes** you have **(1)** R or RStudio installed, **(2)** basic understanding of R (eg., how to load packages), and **(3)** sufficient knowledge of the material presented in STAT 500. This tutorial is suited for anyone who is interested to apply the concepts from STAT 500 in R (we do not re-explain the concepts taught in STAT 500).
+This **tutorial assumes** you have **(1)** R or RStudio installed, **(2)** basic understanding of R (eg., how to load packages), and **(3)** sufficient knowledge of the material presented in STAT 500. This tutorial is suited for anyone who is interested in applying the concepts from STAT 500 in R (we do not re-explain the concepts taught in STAT 500).
 
-### How to use this tutorial
+Each section in this tutorial is associated with the same numbered lesson from the course. As you make your way, you will come across *code examples* and a few *multiple choice questions*. 
 
-Each section in this tutorial is associated with the same numbered lesson from the course. As you make your way, you will come across code examples and multiple choice questions. 
-
-### `r fa("fas fa-lightbulb", fill = "#08192B")` = Example code
+### `r fa("fas fa-lightbulb")` = Example code
 
 Keep an eye out for the lightbulb icon in the header for code examples. The examples contain pre-written, working code 
 that you can run by clicking on the blue 'Run Code' button in the upper right. In the event that you update the code and get an error message, just click on ‘Start Over’ in the upper left to automatically reset the code to the default.
@@ -69,7 +67,7 @@ This code example calculates the mean for 1, 2, 3, 4 and 5. Try running the code
 mean(1:5)
 ```
 
-### `r fa("fas fa-book", fill = "#08192B")` = Multiple Choice Questions
+### `r fa("fas fa-book")` = Multiple Choice Questions
 
 The (skippable) multiple choice questions follow the book icon. The questions are based on the concepts presented in the course, and may have multiple correct answers.
 
@@ -114,19 +112,11 @@ We are finally ready to start with Lesson 1 and explore the data in R!
 
 ## Lesson 1
 
-#### Objectives
+For our first lesson, we'll learn about several R functions to summarize data and start getting familiar with the tidyverse.
 
-For our first lesson, we'll learn about several R functions to summarize data and start getting familiar with the tidyverse:
+### `r fa("fas fa-lightbulb")` Code 1.1: Sample
 
-- `sample()`: Takes a random sample, with or without replacement, from a set
-
-### sample() for random sampling
-
-Use [`sample()`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample) to take a random sample from a set of elements.
-
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.1: Sample
-
-Let's take a sample of 5 customer names without replacement from our grocery data frame. Press 'Run Code' to sample.
+Let's take a sample of 5 customer names without replacement from our grocery data frame. We can do so using [`sample()`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample). Press 'Run Code' to sample.
 
 \**Note: To get a reproducible outcome (the same outcome every time you run the code), simply use the `set.seed()` function before sampling. `set.seed()` somewhat controls for the random part of the sampling.*
 
@@ -135,11 +125,9 @@ Let's take a sample of 5 customer names without replacement from our grocery dat
 sample(x = grocery_table$customer_name, size = 5, replace = FALSE)
 ```
 
-### Summarize 1 Qualitative Variable
+The next 3 code sections visualize 1 qualitative variable via a proportion (contingency) table, pie chart and bar chart.
 
-We will start by constructing a proportion (contingency) table, pie chart and bar chart.
-
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.2: Proportion Table
+### `r fa("fas fa-lightbulb")` Code 1.2: Proportion Table
 
 The proportion table is a simple way to see the frequency distribution of variables. Let's check the breakdown of orders by household size. Run the code below to see that 18.90% of the orders were placed by customers who lived alone.
 
@@ -159,7 +147,7 @@ grocery_table %>%
 
 \**Note: To learn more about what each function does, use `?`. For example, run `?mutate` in your R/RStudio environment.*
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.3: Pie Chart
+### `r fa("fas fa-lightbulb")` Code 1.3: Pie Chart
 
 While there is a quick way to create a pie chart with the `pie()` function, we will dive into another part of the tidyverse: **ggplot2** is the premier data visualization package in R.
 
@@ -197,7 +185,7 @@ grocery_pie %>%
 
 Remeber how **ggplot2** builds visualization layers on top of each other? In the example above, move `theme_void()` to the end and notice how the plot updates. Keep in mind that you do not need to memorize in what order to write the functions; with more practice you'll have a better understanding of what each layer does.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.4: Bar Chart
+### `r fa("fas fa-lightbulb")` Code 1.4: Bar Chart
 
 Next up is the bar chart. Let's summarize the same data from Code 1.3 in the form of a bar chart. If you followed the pie chart example, then the bar chart will be a breeze. The `geom_col()` function is what builds the bar chart.
 
@@ -212,9 +200,9 @@ grocery_table %>%
         title = element_text(family = "Noteworthy Light"))
 ```
 
-### Summarize 1 Qunatitative Variable
+Next, we will summarize a quantitative variable.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.5: Central Tendency
+### `r fa("fas fa-lightbulb")` Code 1.5: Central Tendency
 
 To find the mean and median in R is super easy, simply use `mean()` and `median()`. Meanwhile, base R does not have a function for mode, so we will need to create our own function to compute mode. This will be worth seeing if you've never defined a function before.
 
@@ -251,7 +239,7 @@ grocery_table %>%
             most_freq = stat_mode(cost))
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.6: Position
+### `r fa("fas fa-lightbulb")` Code 1.6: Position
 
 To find any percentile, simply use the `quantile()` function. Let's find the 20, 25, 50, 75 and 99th percentile of the *cost* variable. Notice that the 50th percentile = median from Code 1.5.
 
@@ -259,7 +247,7 @@ To find any percentile, simply use the `quantile()` function. Let's find the 20,
 quantile(grocery_table$cost, probs = c(.2, .25, .5, .75, .99))
 ```
 
-#### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.7: 5 Number Summary
+### `r fa("fas fa-lightbulb")` Code 1.7: 5 Number Summary
 
 The easiest way to find the 5 number summary of a quantitative variable is to use the `summary()` function.
 
@@ -267,7 +255,7 @@ The easiest way to find the 5 number summary of a quantitative variable is to us
 summary(grocery_table$cost)
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.8: Dotplot
+### `r fa("fas fa-lightbulb")` Code 1.8: Dotplot
 
 Let's create a dotplot using **ggplot2**. Let's take this chance to learn another useful function `filter()`. We will use to draw a dotplot to show the distribution of customer age for households of size 3.
 
@@ -281,7 +269,7 @@ grocery_table %>%
   ggpubr::theme_cleveland()
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.9: Stem & Leaf Plot
+### `r fa("fas fa-lightbulb")` Code 1.9: Stem & Leaf Plot
 
 Let's create a stem and leaf plot using base R since there is not much custimization that we can do with this plot.
 
@@ -289,7 +277,7 @@ Let's create a stem and leaf plot using base R since there is not much custimiza
 stem(grocery_table$customer_age)
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.10: Histogram
+### `r fa("fas fa-lightbulb")` Code 1.10: Histogram
 
 You can use `geom_histogram()` or `geom_density()` to display the distribution of a continuous variable using **ggplot2**. We'll use both for the *cost* variable, and also learn how to combine ggplot objects together with `ggarrange()`.
 
@@ -307,7 +295,7 @@ p2 <- grocery_table %>%
 ggpubr::ggarrange(p1, p2)
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 1.11: Boxplot
+### `r fa("fas fa-lightbulb")` Code 1.11: Boxplot
 
 For our 2 final plots in this lesson, we will create 2 boxplots for **(1)** the *cost* variable, and **(2)** *cost* grouped by *payment method*.
 
@@ -338,12 +326,11 @@ grocery_table %>%
   theme(legend.position = "none")
 ```
 
-
 ## Lesson 2
 
 This is a short section. We will cover Venn diagrams and probability network/tree graphs.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.1: Ice Cream Data
+### `r fa("fas fa-lightbulb")` Code 2.1: Ice Cream Data
 
 Think of a *list* object as the general form of a data table. All you need to know for now is that the elements in the *list* do not have to be the same length (vs the columns in a table).
 
@@ -362,7 +349,7 @@ ice_cream <- list(day1 = sample(fl, 10),
 ice_cream
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.2: Venn Diagrams
+### `r fa("fas fa-lightbulb")` Code 2.2: Venn Diagrams
 
 The easiest way to draw venn diagrams with the **ggplot2** layout is by using the **ggvenn** or **ggVennDiagram** packages. You can choose either one. In this tutorial, we will be using **ggVennDiagram** to look at the small ice cream data.
 
@@ -386,7 +373,7 @@ ice_cream %>%
 
 What is the venn diagram above telling us? 11 flavors of the 50 were bought only on day 2 (these 11 flavors were not bought on day 1 or 3). Day 1 and day 3 have 0 flavors in common. Test your understanding below:
 
-### `r fa("fas fa-book", fill = "#08192B")` MCQ 2.1: Venn Diagrams
+### `r fa("fas fa-book")` MCQ 2.1: Venn Diagrams
 
 ```{r venn-quiz}
 quiz(
@@ -405,7 +392,7 @@ quiz(
 )
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 2.3: Probability Tree Diagram
+### `r fa("fas fa-lightbulb")` Code 2.3: Probability Tree Diagram
 
 Imagine that you are flipping a magical coin twice. The coin is magical because the first flip is fair, but the second flip is biased. Everytime you get Tails on the first flip, the chance of getting a second Tails increases to 80%, but the second flip remains fair (50/50) when the first flip results in Heads. Let's represent these probabilities as a diagram.
 
@@ -434,7 +421,7 @@ To answer both questions, simply follow the path:
 
 Now it's your turn:
 
-### `r fa("fas fa-book", fill = "#08192B")` MCQ 2.2: Probability Tree Diagram
+### `r fa("fas fa-book")` MCQ 2.2: Probability Tree Diagram
 
 ```{r tree-quiz}
 quiz(
@@ -463,7 +450,7 @@ quiz(
 
 In this section, you will learn how to use R in order to answer probability questions based on data following a Binomial or Normal distribution. Before doing that, let's quickly look at the Central Limit Theorem.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.1: Central Limit Theorem
+### `r fa("fas fa-lightbulb")` Code 3.1: Central Limit Theorem
 
 ```{r central-limit-theorem}
 par(mfrow = c(2, 2))
@@ -491,7 +478,7 @@ Notice that the shape of the histogram, in this case of data points randomly sam
 - Student t: `rt`
 - Uniform: `runif`
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.2: Binomial Distribution
+### `r fa("fas fa-lightbulb")` Code 3.2: Binomial Distribution
 
 Let's start with the Binomial distrbution to answer the 3 following questions. Assume the data satisfies the 4 conditions of the Binomial:
 
@@ -524,11 +511,11 @@ qbinom(p = c(.17, .37), size = 10, prob = .5, lower.tail = TRUE)
 
 The output of 3 means that **the probability of getting either 0, 1, 2 or 3 Tails when flipping the coin 10 times** is *17%*. There's an *83%* **probability of getting at least 4 Tails on 10 coin flips**. The same idea follows for the 37th quantile.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.3: Sampling Distribution of the Sample Mean (Normal Population)
+### `r fa("fas fa-lightbulb")` Code 3.3: Sampling Distribution of the Sample Mean (Normal Population)
 
 The Normal distribution is the cornerstone of many of the statistical testing methods, so it is a good idea to become familiar with the functions for the Normal distribution in R. First, let's tackle the problems where the population we sample from is Normal.
 
-This is a fictional example: The distribution of the weight of Australian sheep is normal with mean of 70 kg and standard deviation of 8.3 kg. Assume this follows a normal distribution. Now, let's answer 3 common problems that you might find on quizzes using R.
+This is a fictional example: the distribution of the weight of Australian sheep is normal with mean of 70 kg and standard deviation of 8.3 kg. Assume this follows a normal distribution. Now, let's answer 3 common problems that you might find on quizzes using R.
 
 1) What is the probability of randomly selecting a sheep that weighs at least 78.3 kg?
 
@@ -573,7 +560,7 @@ qnorm(p = .8, mean = 70, sd = 8.3)
 ```
 
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.4: Sampling Distribution of the Sample Mean (NOT Normal Population)
+### `r fa("fas fa-lightbulb")` Code 3.4: Sampling Distribution of the Sample Mean (NOT Normal Population)
 
 Now, assume that there is no indication that the sheep population from the previous section is Normal. Can we answer the same 3 questions? If you have read the notes, you know that our method depended on knowing that the distribution is Normal and in this section we do not make such an assumption.
 
@@ -614,10 +601,29 @@ qnorm(p = .8, mean = 70, sd = standard_error)
 Finally, let's represent both distributions from sections 3.3 and 3.4 graphically using *ggplot2*:
 
 ```{r norm-ggplot, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# 're-create' data based on given mean and standard deviation
+set.seed(500)
+data_3.3 <- rnorm(n = 10000, mean = 70, sd = 8.3)
+data_3.4 <- rnorm(n = 166, mean = 70, sd = 8.3 / sqrt(166))
 
+# put data in table for easy plotting
+data_plot <- tibble(values = c(data_3.3, data_3.4), 
+                    source = c(rep("Normal", 10000), rep("CLT", 166)))
+
+# density plots
+# install.packages("remotes")
+remotes::install_github("R-CoderDotCom/ridgeline@main")
+library(ridgeline)
+
+# ridge plot
+ridgeline(data_plot$values, data_plot$source, 
+          palette = hcl.colors(2, palette = "Spectral", alpha = .75), 
+          main = "Distributions of Sheep Weight")
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 3.5: Sampling Distribution of the Sample Proportion
+Notice how the sampling distribution (CLT) is much narrower than the original normal population.
+
+### `r fa("fas fa-lightbulb")` Code 3.5: Sampling Distribution of the Sample Proportion
 
 Let's dive straight into this section with 2 questions. Suppose that 65% of restaurants in Pennsylvania have vegan meals on their menu.
 
@@ -657,7 +663,7 @@ In the next section, we will explore confidence intervals.
 
 It's time to talk about statistical inference. In particular, we will be dicussing confidence intervals in R. Remember the general form `r cat(crayon::bold("CI = Point Estimate ± Margin of Error"))`.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.1: Confidence Intervals for Population Proportion (Manual)
+### `r fa("fas fa-lightbulb")` Code 5.1: Confidence Intervals for Population Proportion (Manual)
 
 The 'Manual' part means that we will be calculating each part separately rather than using a specific function (see Code 5.3).
 
@@ -691,7 +697,7 @@ cat(crayon::magenta("The 95% confidence interval is (", lower_bound, ", ", upper
 
 We are 95% confident that between 58.46% and 70.34% of current NBA players and coaches think Michael Jordan is the greatest basketball player of all time.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.2: Confidence Intervals for Population Mean (Manual)
+### `r fa("fas fa-lightbulb")` Code 5.2: Confidence Intervals for Population Mean (Manual)
 
 We're going to be constructing the confidence interval only for the case where the population standard deviation is unknown since this is more indicative of real-life (we rarely know the population standard deviation). 
 
@@ -725,7 +731,7 @@ cat(crayon::magenta("The 95% confidence interval is (", lower_bound, ", ", upper
 
 We are 95% confident that the mean departure delay time at Los Angeles International Airport is between 19.14 and 22.86 minutes.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.3: Confidence Intervals (`Rmisc` package)
+### `r fa("fas fa-lightbulb")` Code 5.3: Confidence Intervals (`Rmisc` package)
 
 The `CI()` function in the `Rmisc` package constructs the confidence interval in one step, as long as we have the original data. We will quickly generate normal random data with mean of 21 and standard deviation of 7.
 
@@ -743,7 +749,7 @@ CI(x = random_data, ci = .9)
 
 Notice that the confidence interval is similar to the one we constructed manually in Code 5.2. It is not exactly the same since the mean and standard deviations will not be exactly 21 and 7, respectively, when using `rnorm()`.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 5.4: Checking Normality
+### `r fa("fas fa-lightbulb")` Code 5.4: Checking Normality
 
 Finally, let's see how we can draw the normal probability plot in R to check if the data is normal. We will learn about 2 methods; the second allows for more customizations.
 
@@ -808,7 +814,7 @@ In this section, we will explore hypothesis testing in R by conducting the tests
 
 It is a good habit to add comments to your code. You can do so in R via the `#` symbol.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 6.1: Hypothesis Testing for 1 Sample Proportion
+### `r fa("fas fa-lightbulb")` Code 6.1: Hypothesis Testing for 1 Sample Proportion
 
 Suppose we take a random sample of 200 cereal boxes from a supermarket and find that 112 are red. Can we conclude that the proportion of red cereal boxes is larger than 0.5 at a 10% level of significance?
 
@@ -835,7 +841,7 @@ test_results$conf.int
 
 Notice that the values are the same to 2 decimal places.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 6.1: Hypothesis Testing for 1 Sample Mean
+### `r fa("fas fa-lightbulb")` Code 6.1: Hypothesis Testing for 1 Sample Mean
 
 Say we take a random sample of 200 cereal boxes of the same kind. The manufacturer claims that each box contains 30 grams of cereal. We empty the contents of each box, and find the mean weight of the cereal in the boxes to be 29.3 grams. Based on our measurements, can we reject the manufacturer's hypothesis that each box contains 30 grams of cereal at a 5% significance level?
 
@@ -862,7 +868,7 @@ Before moving on to the next section, try running the hypothesis test examples f
 
 Let's move on to a higher data dimension from our previous lesson and compare two population parameters.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.1: Comparing Two Population Proportions
+### `r fa("fas fa-lightbulb")` Code 7.1: Comparing Two Population Proportions
 
 In this case, the data values are categorical and taken from two distinct groups.
 
@@ -884,7 +890,7 @@ prop.test(data_mat, alternative = "two.sided", conf.level = .95, correct = FALSE
 
 Since the p-value = .002 < .05, we conclude that there is enough evidence to suggest that the proportions of high school and university students who own an Apple product are different.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.2: Comparing Two Population Means (Independent)
+### `r fa("fas fa-lightbulb")` Code 7.2: Comparing Two Population Means (Independent)
 
 In this case, the data values are quantitative and taken from two distinct groups.
 
@@ -913,7 +919,7 @@ The `equal_var` object will returm `TRUE` if the variances can be assumed to be 
 
 Since p-value ~ 0 < .05, we can conclude that the true mean RHR of professional soccer players is lower than that of pro golfers.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.3: Comparing Two Population Means (Paired)
+### `r fa("fas fa-lightbulb")` Code 7.3: Comparing Two Population Means (Paired)
 
 In this case, the data values are quantitative and taken twice from each subject.
 
@@ -937,7 +943,7 @@ t.test(x = before, y = after, alternative = "two.sided", conf.level = .99, paire
 
 Since p-value ~ 0 < .01, we can conclude that the workout routine is effective for weight loss. Furthermore, we are 99% confident that the true mean weight loss is between 4.07 and 7.40 kg.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 7.4: Comparing Two Population Variances
+### `r fa("fas fa-lightbulb")` Code 7.4: Comparing Two Population Variances
 
 Suppose that the statisticians working at a chocolate manufacturer suspects that one of the older machines is no longer producing the desired weight of chocolate in each package consistently. They test their claim by comparing the variance in weight of 100 pieces of chocolate produced by the older machine and a newer one that they know works as desired.
 
@@ -965,7 +971,7 @@ This concludes our section on cmpaing two population variances. Next, we will di
 
 How can we test if two categorical variables are dependent? Enter the Chi-Square Test of Independence. First, let's take a look at contingency tables in R.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 8.1: Contingency Table
+### `r fa("fas fa-lightbulb")` Code 8.1: Contingency Table
 
 We touched on proportion tables in lesson 1, but we will dive deeper in this section.
 
@@ -1041,7 +1047,7 @@ grocery_table %>%
 
 The 4 graphs above more or less tell the same story, and they can all be further customized to suit your needs.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 8.2: Chi-Square Test
+### `r fa("fas fa-lightbulb")` Code 8.2: Chi-Square Test
 
 Fianlly, let's test whether household size and payment method are dependent. Since both variables are categorical, we can run a chi-square test. Here's how to do it in R:
 
@@ -1090,7 +1096,7 @@ chi_output <- chisq.test(contingency_table)
 
 The cell **Credit Card on delivery** and **7** contributes the most (47%) to the chi-square score.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 8.3: Final Plot
+### `r fa("fas fa-lightbulb")` Code 8.3: Final Plot
 
 Before wrapping up this lesson, let's create 1 more plot:
 
@@ -1111,7 +1117,7 @@ This concludes lesson 8. Coming up next is linear regression.
 
 In this penultimate lesson we will explore correlation and simple linear regression. When the response and explanatory variables are quantitative, a good place to start is to analyze the linear relationship between the variables.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.1: Correlation Coefficients
+### `r fa("fas fa-lightbulb")` Code 9.1: Correlation Coefficients
 
 We will use the built-in dataset `mtcars` to analyze the correlation between the quantitative variables. The `cor()` function can be used to calculate the correlation coefficient; however, we want to also be able to visualize the relationship all in one scoop. We can do so with `ggpairs()` from the *GGally* package:
 
@@ -1145,7 +1151,7 @@ mtcars %>%
   geom_point()
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.2: Correlation Test
+### `r fa("fas fa-lightbulb")` Code 9.2: Correlation Test
 
 Let's run a correlation test between **mpg** and **hp**.
 
@@ -1169,7 +1175,7 @@ rcorr(data)
 ```
 
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.3: Correlation
+### `r fa("fas fa-lightbulb")` Code 9.3: Correlation
 
 Let's combine the ideas of correlation coefficients and tests in a visualization:
 
@@ -1196,7 +1202,7 @@ mtcars %>%
   correlation(include_factors = TRUE)
 ```
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 9.4: Simple Linear Regression
+### `r fa("fas fa-lightbulb")` Code 9.4: Simple Linear Regression
 
 Since we are nearing the end of this lesson (and tutorial as a whole), let's analyze a full SLR with a publication worthy visualization.
 
@@ -1268,7 +1274,7 @@ We have reached the end of lesson 9. One more lesson to go.
 
 We're so close to the end! Our final lesson is about ANOVA, one of the most important statistical methods to have in your toolbox. As we did with SLR, we will learn how to conduct one way anova and check for the conditions. We will end by running post-hoc tests.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.1: Data Preparation
+### `r fa("fas fa-lightbulb")` Code 10.1: Data Preparation
 
 Let's explore a new dataset from the *grocerycart* package: `eg_data` contains information on 15,000+ grocery products from over 100 stores. One of the stores, 'Grandiose', has multiple locations. Say that 'Grandiose' has hired you to analyze whether the average amount spent at their 3 largest stores (i.e., stores with the most products) is different. In other words, **H0: mean 1 = mean 2 = mean 3** and **Ha: at least one of the means is different**.
 
@@ -1318,7 +1324,7 @@ grandiose %>%
 
 At a quick glance, we can see the products in **Grandiose Hypermarket Abu Dhabi** are the most expensive on average, but is the difference big enough to conclude a statistical significance? Let's find out.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.2: ANOVA
+### `r fa("fas fa-lightbulb")` Code 10.2: ANOVA
 
 Time to finally conduct ANOVA in R:
 
@@ -1339,7 +1345,7 @@ aov(price ~ store_name, data = grandiose) %>%
 
 Since the p-value ~ 0, we can conclude that at least one of the means is diffirent. However, can we trust this result? Let's check the ANOVA assumptions.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.3: ANOVA Assumptions
+### `r fa("fas fa-lightbulb")` Code 10.3: ANOVA Assumptions
 
 Firstly, the data is independent.
 
@@ -1399,7 +1405,7 @@ Since p-value for Levene's test is ~ 0, we can conclude that the variances are n
 
 Also, it's a good idea to explore any potential outliers. This is out of scope of this course and tutorial so we will assume we do not have any major outliers.
 
-### `r fa("fas fa-lightbulb", fill = "#08192B")` Code 10.3: Post-hoc Tests
+### `r fa("fas fa-lightbulb")` Code 10.3: Post-hoc Tests
 
 Remeber that our ANOVA returned a significant result (see Code 10.1). How can we see which groups are different from each other? Post-hoc tests allow us to run multiple comparisons of all pairwise means:
 - Grandiose Barsha vs Grandiose Hypermarket Abu Dhabi
@@ -1461,11 +1467,27 @@ All 3 confidence intervals do not contain 0. We can conclude that the **Abu Dhab
 
 We have reached the end of this lesson.
 
-## Lesson 00: End
+## Lesson 00: Final Thoughts
 
-Congratulations! You have made it to the end of this tutorial and course. Good luck on your final exam. 
+Congratulations! You have made it to the end of this tutorial and course. At this stage, you are able to start your own analysis from scratch and create publication worthy visualizations with *ggplot2*. Remember that you do not need to memorize all the functions presented in this tutorial. Focus on understanding the statistical theory first, and then you can search online on how to apply the concepts in R.
 
-### what next?
-### edit aesthetics (dark code blocks, color headings)
+### What next?
 
-Remember that you can always visit this tutorial by running the following command in your R console: `learnr::run_tutorial("introduction", "stat500r")`
+Here are some free resources to help you continue your R journey:
+
+- [R for Data Science](https://r4ds.had.co.nz): Build a solid foundation of the tidyverse.  
+- [ggplot2](https://ggplot2-book.org): Understand the Grammar of Graphics theory that ggplot2 uses.  
+- [R Graphics Cookbook](https://r-graphics.org): Bookmark this cookbook to help you quickly lookup practical tips when creating visualizations.  
+- [Mastering Shiny](https://mastering-shiny.org): Create and deploy web applications all within R.  
+- [Text Mining with R](https://www.tidytextmining.com): Learn how to analyze text data.  
+- [RStudio Webinars](https://www.rstudio.com/resources/webinars/): Explore webinars presented by professionals in the data space.  
+- [TidyTuesday](https://github.com/rfordatascience/tidytuesday): Practice your R skills with weekly data projects.  
+
+### Contact the author (me)
+
+- [Github Profile](https://github.com/moamiristat)
+- [Email](mailto:moamiristat@protonmail.com)
+
+Hope you enjoyed this tutorial and good luck! Remember that you can always visit this tutorial by running the following command in your R console: `learnr::run_tutorial("introduction", "stat500r")`.
+
+THE END.
