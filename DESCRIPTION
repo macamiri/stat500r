@@ -3,7 +3,7 @@ Title: R Companion for STAT 500
 Version: 0.0.0.9000
 Authors@R: 
     person("Mo", "Amiri", , "moamiristat@protonmail.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Description: Learn how to use R to apply the concepts taught in the STAT 500 course.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
