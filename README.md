@@ -25,16 +25,16 @@ Here are screenshots of the tutorial:
 
 <img src="inst/tutorials/Introduction/images/tutorial-2.png" height="500px" />
 
-<img src="inst/tutorials/Introduction/images/tutorial-3.png" height="250px" />
-<img src="inst/tutorials/Introduction/images/tutorial-4.png" height="250px" />
+<img src="inst/tutorials/Introduction/images/tutorial-3.png" height="200px" />
+<img src="inst/tutorials/Introduction/images/tutorial-4.png" height="200px" />
 
 <img src="inst/tutorials/Introduction/images/tutorial-5.png" height="500px" />
 
-<img src="inst/tutorials/Introduction/images/tutorial-6.png" height="250px" />
-<img src="inst/tutorials/Introduction/images/tutorial-7.png" height="250px" />
+<img src="inst/tutorials/Introduction/images/tutorial-6.png" height="200px" />
+<img src="inst/tutorials/Introduction/images/tutorial-7.png" height="200px" />
 
-<img src="inst/tutorials/Introduction/images/tutorial-8.png" height="250px" />
-<img src="inst/tutorials/Introduction/images/tutorial-9.png" height="250px" />
+<img src="inst/tutorials/Introduction/images/tutorial-8.png" height="200px" />
+<img src="inst/tutorials/Introduction/images/tutorial-9.png" height="200px" />
 
 This tutorial is made possible by the following packages:
 
