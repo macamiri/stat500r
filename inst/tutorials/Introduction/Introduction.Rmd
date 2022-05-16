@@ -997,7 +997,7 @@ The stacked bar chart below shows that online payment was the most popular metho
 grocery_table %>% 
   ggplot(aes(x = household_size, fill = payment_method)) + 
   geom_bar(position = "stack") + 
-  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred\nby Household Size") + 
+  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred by Household Size") + 
   scale_fill_viridis_d(direction = -1, guide = guide_legend(title = "Payment")) + 
   ggpubr::theme_pubclean() + 
   theme(legend.position = "bottom")
@@ -1010,7 +1010,7 @@ We can represent the same information, but with the bars next to each other. Sim
 grocery_table %>% 
   ggplot(aes(x = household_size, fill = payment_method)) + 
   geom_bar(position = "dodge") + 
-  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred\nby Household Size") + 
+  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred by Household Size") + 
   scale_fill_viridis_d(direction = -1, guide = guide_legend(title = "Payment")) + 
   ggpubr::theme_pubclean() + 
   theme(legend.position = "bottom")
@@ -1023,7 +1023,7 @@ What if you want to group the bars by each payment method? This is where `facet_
 grocery_table %>% 
   ggplot(aes(x = household_size, fill = household_size)) + 
   geom_bar(position = "dodge") + 
-  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred\nby Household Size") + 
+  labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred by Household Size") + 
   scale_fill_viridis_d(direction = 1, guide = guide_legend(title = "Payment")) + 
   ggpubr::theme_pubclean() + 
   facet_wrap(~ payment_method) + 
@@ -1215,7 +1215,7 @@ lm(formula = mpg ~ hp, data = mtcars) %>%
   summary()
 ```
 
-Focus your attention on the coefficients part of the output: `r cat(crayon::bold("mpg = -.06823 * hp + 30.09886"))`. This means that on average, as horse power increases by 1 unit, the car's miles per gallon decreases by .068.
+Focus your attention on the coefficients part of the output. The **hp** coefficient of -.06823 means that, on average, as horse power increases by 1 unit, the car's miles per gallon decreases by .068.
 
 You can extract specific parts of the output such as the residuals by (1) assigning the `lm()` output to a variable, then (2) using `$` to extract the part you want.
 
@@ -1315,7 +1315,7 @@ grandiose %>%
   ggplot(aes(x = store_name, y = price, color = store_name)) + 
   geom_boxplot() +
   ggbeeswarm::geom_quasirandom(alpha = .6, size = 2) + 
-  labs(x = "Store", y = "Price", title = ("Products Prices:\nTop 3 Grandiose Stores")) +
+  labs(x = "Store", y = "Price", title = ("Products Prices: Top 3 Grandiose Stores")) +
   hrbrthemes::theme_ipsum(grid = "Y") + 
   scale_color_brewer(palette = "Dark2") + 
   coord_cartesian(ylim = c(0, 15)) + # this cuts the y-axis range, but we do not care about outliers yet
