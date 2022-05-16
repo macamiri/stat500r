@@ -1101,7 +1101,7 @@ The cell **Credit Card on delivery** and **7** contributes the most (47%) to the
 Before wrapping up this lesson, let's create 1 more plot:
 
 ```{r cont-table-seven, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# library(ggstatsplot)
+library(ggstatsplot)
 
 # plot
 grocery_table %>% 
