@@ -336,15 +336,15 @@ This is the end of our first lesson!
 
 ## Lesson 2
 
-This is a short section. We will cover Venn diagrams and probability network/tree graphs.
+In this section, we will cover Venn diagrams and probability network/tree graphs.
 
 ### `r fa("fas fa-lightbulb")` Code 2.1: Ice Cream Data
 
-Think of a *list* object as the general form of a data table. All you need to know for now is that the elements in the *list* do not have to be the same length (vs the columns in a table).
+Think of a *list* object in R as the general form of a table: 2 differences between a *list* and table are (1) the elements in the *list* do not have to be the same length (vs columns in a table), and (2) a table is 2-dimensional, while a *list* can be n-dimensional.
 
-We will create a *list* to track what flavors were bought across 3 days at an ice cream shop. Assume that each flavor can be bought only once a day (sample without replacement), all the flavors are restocked at the end of the day, and they are equally likely to be chosen.
+We will create a *list* object to track what flavors were bought across 3 days at an ice cream shop. Assume that (1) each flavor can be bought only once a day (sample without replacement), (2) all the flavors are restocked at the end of the day, and (3) they are equally likely to be chosen.
 
-Note our use of `sample()` and `set.seed()` that you learnt in Lesson 1.
+Note our use of `sample()` and `set.seed()` (see Code 1.1).
 
 ```{r ice-cream, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 fl<- paste0("Flavor#", 1:30)
@@ -361,7 +361,7 @@ ice_cream
 
 The easiest way to draw venn diagrams with the **ggplot2** layout is by using the **ggvenn** or **ggVennDiagram** packages. You can choose either one. In this tutorial, we will be using **ggVennDiagram** to look at the small ice cream data.
 
-How many of the 50 possible flavors were bought on all 3 days? What about on day 1 and day 3 only? Let's build a venn diagram to find out.
+How many of the 50 possible flavors were bought on all 3 days? What about those that were chosen only on day 1 and day 2? Let's build a venn diagram to easily identify the answers.
 
 ```{r venn-diagram, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # Create the data
@@ -379,16 +379,18 @@ ice_cream %>%
   theme_void()
 ```
 
-What is the venn diagram above telling us? 11 flavors of the 50 were bought only on day 2 (these 11 flavors were not bought on day 1 or 3). Day 1 and day 3 have 0 flavors in common. Test your understanding below:
+The venn diagram above is telling us that 7 out of the 50 flavors were bought on both day 1 and 2, but not on day 3. None of the flavors (0) were bought on all 3 days.
+
+Test your understanding below:
 
 ### `r fa("fas fa-book")` MCQ 2.1: Venn Diagrams
 
 ```{r venn-quiz}
 quiz(
-  question("How many flavors do all the 3 days have in common?",
-    answer("0", correct = TRUE),
+  question("How many flavors were only bought on day 3?",
+    answer("0"),
     answer("2"),
-    answer("3"),
+    answer("3", correct = TRUE),
     answer("7")
   ),
   question("How many flavors do day 2 and day 3 have in common?",
@@ -402,9 +404,9 @@ quiz(
 
 ### `r fa("fas fa-lightbulb")` Code 2.3: Probability Tree Diagram
 
-Imagine that you are flipping a magical coin twice. The coin is magical because the first flip is fair, but the second flip is biased. Everytime you get Tails on the first flip, the chance of getting a second Tails increases to 80%, but the second flip remains fair (50/50) when the first flip results in Heads. Let's represent these probabilities as a diagram.
+Imagine that you are flipping a magical coin twice. The coin is magical because the first flip is fair, while the second flip is biased (not 50/50). Everytime you get Tails on the first flip, the chance of getting a Tails on the second flip increases to 80%. The second flip remains fair (50/50) when the first flip results in Heads. Let's represent these probabilities as a tree diagram.
 
-A popular package for constructing network graph diagrams is **diagrammeR**. We will use it to find out what is the probability of **(1)** Tails AND Heads (no specific order), and **(2)** Tails on 2nd flip GIVEN it was Tails on the 1st flip.
+A popular package for constructing network graph diagrams is **DiagrammeR**. We will use it to find out what is the probability of **(1)** Tails AND Heads (no specific order), and **(2)** Tails on 2nd flip GIVEN it was Tails on the 1st flip.
 
 ```{r prob-tree, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 create_graph() %>% 
@@ -424,8 +426,10 @@ create_graph() %>%
 ```
 
 To answer both questions, simply follow the path:
+
 **(1)** P(Tails AND Heads) = P(1st Tails AND 2nd Heads) + P(1st Heads AND 2nd Tails) = .5(.2) + .5(.5) = `r .5 * .2 + .5 * .5`
-**(2)** P(2nd Tails | 1st Tails) = Only look at the top half of the graph = `r .8`
+
+**(2)** P(2nd Tails | 1st Tails) = Only look at the top half of the graph since we know the first flip was Tails = `r .8`
 
 Now it's your turn:
 
@@ -442,7 +446,7 @@ quiz(
   question("Find P(2nd Tails).",
     answer("0.25"),
     answer("0.50"),
-    answer("0.65", correct = TRUE),
+    answer("0.65", correct = TRUE, message = .5(.8) + .5(.5)),
     answer("0.80")
   ),
   question("Are the 1st and 2nd flip independent?",
@@ -451,6 +455,8 @@ quiz(
   )
 )
 ```
+
+This brings us to the end of lesson 2. Catch you in lesson 3 & 4.
 
 ## Lesson 3 & 4
 
@@ -476,7 +482,9 @@ sampling_dist_3 <- replicate(100, mean(runif(100))) %>% hist(main = "n = 100")
 sampling_dist_4 <- replicate(10000, mean(runif(100))) %>% hist(main = "n = 10,000")
 ```
 
-Notice that the shape of the histogram, in this case of data points randomly sampled from a uniform distribution, approaches the normal distribution as the sample size `n` increases from 10 -> 30 -> 100 -> 10,000. This is what the Central Limit Theorem is about. The same simulation can be repeated by randomly sampling data points from different distributions. To do so in the code above, replace the `runif` function with the random generator function of another distribution. Here are some of the distributions:
+Notice that the shape of the histogram, in this case of data points randomly sampled from a uniform distribution, approaches the normal distribution as the sample size `n` increases from 10 -> 30 -> 100 -> 10,000. This is what the Central Limit Theorem is about.
+
+The same simulation can be repeated by randomly sampling data points from different distributions. To do so in the code above, replace the `runif` function with the random generator function of another distribution. Here are some of the distributions:
 
 - Binomial: `rbinom`
 - Chi-Square: `rchisq`
@@ -488,7 +496,7 @@ Notice that the shape of the histogram, in this case of data points randomly sam
 
 ### `r fa("fas fa-lightbulb")` Code 3.2: Binomial Distribution
 
-Let's start with the Binomial distrbution to answer the 3 following questions. Assume the data satisfies the 4 conditions of the Binomial:
+Let's start with the Binomial distrbution to answer the 3 following questions. Assume the data satisfies the 4 conditions for the Binomial:
 
 1) What is the probability of getting exactly 3 Tails when flipping a fair coin 10 times?
 
@@ -517,13 +525,13 @@ pbinom(q = 3, size = 10, prob = .5, lower.tail = FALSE)
 qbinom(p = c(.17, .37), size = 10, prob = .5, lower.tail = TRUE)
 ```
 
-The output of 3 means that **the probability of getting either 0, 1, 2 or 3 Tails when flipping the coin 10 times** is *17%*. There's an *83%* **probability of getting at least 4 Tails on 10 coin flips**. The same idea follows for the 37th quantile.
+The output of `3` means that **the probability of getting either 0, 1, 2 or 3 Tails when flipping the coin 10 times** is *17%*. There's an *83%* (1 - .17) **probability of getting at least 4 Tails on 10 coin flips**. The same idea follows for the 37th quantile.
 
 ### `r fa("fas fa-lightbulb")` Code 3.3: Sampling Distribution of the Sample Mean (Normal Population)
 
-The Normal distribution is the cornerstone of many of the statistical testing methods, so it is a good idea to become familiar with the functions for the Normal distribution in R. First, let's tackle the problems where the population we sample from is Normal.
+The Normal distribution is the cornerstone of many statistical testing methods, so it is a good idea to become familiar with the functions for the Normal distribution in R. First, let's tackle the problems where the population we sample from is Normal.
 
-This is a fictional example: the distribution of the weight of Australian sheep is normal with mean of 70 kg and standard deviation of 8.3 kg. Assume this follows a normal distribution. Now, let's answer 3 common problems that you might find on quizzes using R.
+This is a fictional example: the distribution of the weight of Australian sheep is normal with mean of 70 kg and standard deviation of 8.3 kg. Assume this follows a normal distribution. Now, let's use R to answer 3 common problems that you might come across in quizzes.
 
 1) What is the probability of randomly selecting a sheep that weighs at least 78.3 kg?
 
@@ -570,9 +578,9 @@ qnorm(p = .8, mean = 70, sd = 8.3)
 
 ### `r fa("fas fa-lightbulb")` Code 3.4: Sampling Distribution of the Sample Mean (NOT Normal Population)
 
-Now, assume that there is no indication that the sheep population from the previous section is Normal. Can we answer the same 3 questions? If you have read the notes, you know that our method depended on knowing that the distribution is Normal and in this section we do not make such an assumption.
+Now, assume that there is no indication that the sheep population from the Code 3.3 is Normal. Can we answer the same 3 questions? If you have read the notes, you know that our method depends on knowing that the distribution is Normal and in this section we do not make such an assumption.
 
-Instead let's take a sample of size n = 166 sheeps from the population. By the Central Limit Theorem, we can now assume that the sampling distribution of the mean weight of the sheep is Normal with a mean of 70 kg and standard error of 8.3 / sqrt(166) = `r 8.3 / sqrt(166)`
+Let's start by taking a random sample of size n = 166 sheeps from the population. By the Central Limit Theorem, we can now assume that the sampling distribution of the sample mean weight of the sheep is Normal with a mean of 70 kg and standard error of 8.3 / sqrt(166) = `r 8.3 / sqrt(166)`
 
 1) What is the probability that the sample mean will be at least 78.3 kg?
 
@@ -606,7 +614,7 @@ standard_error <- 8.3 / sqrt(166)
 qnorm(p = .8, mean = 70, sd = standard_error)
 ```
 
-Finally, let's represent both distributions from sections 3.3 and 3.4 graphically using *ggplot2*:
+Let's represent both distributions from sections 3.3 and 3.4 graphically using *ggplot2*:
 
 ```{r norm-ggplot, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # 're-create' data based on given mean and standard deviation
@@ -629,13 +637,13 @@ ridgeline(data_plot$values, data_plot$source,
           main = "Distributions of Sheep Weight")
 ```
 
-Notice how the sampling distribution (CLT) is much narrower than the original normal population.
+Notice how the sampling distribution (CLT) is much narrower than the original normal population (Normal).
 
 ### `r fa("fas fa-lightbulb")` Code 3.5: Sampling Distribution of the Sample Proportion
 
 Let's dive straight into this section with 2 questions. Suppose that 65% of restaurants in Pennsylvania have vegan meals on their menu.
 
-1) If a random sample of 40 restaurants were selected, what is the probability that the proportion of the sample that has a vegan meal on their menu is at least 70%? The conditions for the sampling distribution of the sample proportion are satisfied.
+1) If a random sample of 40 restaurants were selected, what is the probability that the proportion of the sample that has a vegan meal on their menu is at least 70%? Assume that the conditions for the sampling distribution of the sample proportion are satisfied.
 
 ```{r prop-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 standard_error <- sqrt(.65 * (1 - .65) / 40)
@@ -665,7 +673,7 @@ Therefore, there is a 14.64% chance to get a sample proportion between 70% and 8
 
 As a challenge, try to answer the questions in the course notes using R.
 
-In the next section, we will explore confidence intervals.
+In the next section, be ready to explore confidence intervals.
 
 ## Lesson 5
 
