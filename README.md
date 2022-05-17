@@ -14,12 +14,13 @@ The topics covered include, but are not limited to:
 - Exploring the **tidyverse**.  
 - And more…  
 
+## Run Tutorial
 **A live version of the tutorial can be run with the following commands in your R console** (it opens the tutorial in a new tab in your default web browser):  
 `install.packages("remotes")`  
 `remotes::install_github("moamiristat/stat500r")`  
 `learnr::run_tutorial("Introduction", "stat500r")`  
 
-Here are screenshots of the tutorial:
+## Tutorial Screenshots
 
 <img src="inst/tutorials/Introduction/images/tutorial-1.png" height="500px" />
 
@@ -36,20 +37,20 @@ Here are screenshots of the tutorial:
 <img src="inst/tutorials/Introduction/images/tutorial-8.png" height="500px" />
 <img src="inst/tutorials/Introduction/images/tutorial-9.png" height="500px" />
 
-This tutorial is made possible by the following packages:
+## Packages Used
 
-- `learnr`  
-- `tidyverse`  
-- `grocerycart`  
-- `fontawesome`  
-- `ggVennDiagram`  
-- `DiagrammeR`  
-- `scales`  
-- `viridis`  
-- `ggpubr`  
-- `crayon`  
-- `remotes`  
-- `hrbrthemes`  
-- `ggbeeswarm`  
-- `ggthemes`  
-- `ggstatsplot`  
+- [learnr](https://rstudio.github.io/learnr/articles/learnr.html)  
+- [tidyverse](https://tidyverse.tidyverse.org/index.html)  
+- [grocerycart](https://github.com/moamiristat/grocerycart)  
+- [DiagrammeR](https://github.com/rich-iannone/DiagrammeR)  
+- [crayon](https://github.com/r-lib/crayon)  
+- [fontawesome](https://rstudio.github.io/fontawesome/index.html)  
+- [ggbeeswarm](https://github.com/eclarke/ggbeeswarm)  
+- [ggpubr](https://rpkgs.datanovia.com/ggpubr/)  
+- [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)  
+- [ggthemes](https://yutannihilation.github.io/allYourFigureAreBelongToUs/ggthemes/)  
+- [ggVennDiagram](https://github.com/gaospecial/ggVennDiagram)  
+- [hrbrthemes](https://hrbrmstr.github.io/hrbrthemes/)  
+- [remotes](https://remotes.r-lib.org)  
+- [scales](https://scales.r-lib.org)  
+- [viridis](https://cran.r-project.org/web/packages/viridis/index.html)
