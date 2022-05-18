@@ -1522,6 +1522,7 @@ grocery_table %>%
   ggplot(aes(x = payment_method, y = cost, color = payment_method)) + 
   geom_violin(trim = TRUE, fill = NA) + # step (2)
   geom_boxplot(width = .1) + 
+  ggbeeswarm::geom_quasirandom(alpha = .1, size = 2) + 
   labs(x = "Payment Method", y = "Cost", 
        title = "Heteroscedastic 1-way ANOVA for Mean Order Value", 
        subtitle = res_aov$expression[[1]]) + # step (3)
@@ -1551,10 +1552,9 @@ Here are some free resources to help you continue your R journey:
 
 ### Contact the author (me)
 
-If you notice any theory/code mistakes in this tutorial, kindly let me know:
+If you notice any theory/code mistakes in this tutorial, kindly let me know via Github:
 
 - [Github Profile](https://github.com/moamiristat)
-- [Email](mailto:moamiristat@protonmail.com)
 
 Hope you enjoyed this tutorial and good luck in your R journey! Remember that you can always visit this tutorial by running the following command in your R console: `learnr::run_tutorial("introduction", "stat500r")`.
 

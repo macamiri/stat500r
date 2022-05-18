@@ -15,10 +15,17 @@ The topics covered include, but are not limited to:
 - And more…  
 
 ## Run Tutorial
-**A live version of the tutorial can be run with the following commands in your R console** (it opens the tutorial locally on your computer in a new tab in your default web browser):  
-`install.packages("remotes")`  
-`remotes::install_github("moamiristat/stat500r")`  
-`learnr::run_tutorial("Introduction", "stat500r")`  
+**A live version of the tutorial can be run by typing the following commands in your R console** (it opens the tutorial locally on your computer in a new tab in your default web browser):  
+```
+# needed to install the stat500r package (run only once)
+install.packages("remotes")
+
+# install stat500r package from github (run only once)
+remotes::install_github("moamiristat/stat500r")
+
+# run tutorial (run whenever you want to start up the tutorial)
+learnr::run_tutorial("Introduction", "stat500r")
+```
 
 ## Tutorial Screenshots
 
@@ -38,6 +45,8 @@ The topics covered include, but are not limited to:
 <img src="inst/tutorials/Introduction/images/tutorial-9.png" height="500px" />
 
 ## Packages Used
+
+The tutorial was put together using the `learnr` package. All other packages contributed to the analysis portion of the tutorial.
 
 - [learnr](https://rstudio.github.io/learnr/articles/learnr.html)  
 - [tidyverse](https://tidyverse.tidyverse.org/index.html)  
