@@ -27,6 +27,12 @@ remotes::install_github("moamiristat/stat500r")
 learnr::run_tutorial("Introduction", "stat500r")
 ```
 
+https://user-images.githubusercontent.com/98935576/169015841-1484c19d-c7df-4cca-861e-9fdc2054aee1.mov
+
+https://user-images.githubusercontent.com/98935576/169015912-81c8d397-520b-4e5c-8fa5-0006a6aa76e5.mov
+
+https://user-images.githubusercontent.com/98935576/169015942-2ba75bd8-b1a8-4b32-bb96-4c09d6a9fb17.mov
+
 ## Tutorial Screenshots
 
 <img src="inst/tutorials/Introduction/images/tutorial-1.png" height="500px" />
