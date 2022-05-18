@@ -15,7 +15,7 @@ The topics covered include, but are not limited to:
 - And more…  
 
 ## Run Tutorial
-**A live version of the tutorial can be run with the following commands in your R console** (it opens the tutorial in a new tab in your default web browser):  
+**A live version of the tutorial can be run with the following commands in your R console** (it opens the tutorial locally on your computer in a new tab in your default web browser):  
 `install.packages("remotes")`  
 `remotes::install_github("moamiristat/stat500r")`  
 `learnr::run_tutorial("Introduction", "stat500r")`  
@@ -43,14 +43,24 @@ The topics covered include, but are not limited to:
 - [tidyverse](https://tidyverse.tidyverse.org/index.html)  
 - [grocerycart](https://github.com/moamiristat/grocerycart)  
 - [DiagrammeR](https://github.com/rich-iannone/DiagrammeR)  
+- [car](https://cran.rstudio.com/web/packages/car/index.html)  
+- [correlation](https://www.rdocumentation.org/packages/correlation/versions/0.8.0)  
+- [corrplot](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)  
 - [crayon](https://github.com/r-lib/crayon)  
 - [fontawesome](https://rstudio.github.io/fontawesome/index.html)  
+- [GGally](https://ggobi.github.io/ggally/)  
 - [ggbeeswarm](https://github.com/eclarke/ggbeeswarm)  
+- [ggfortify](https://rpubs.com/sinhrks/plot_lm)  
+- [ggmosaic](https://haleyjeppson.github.io/ggmosaic/)  
 - [ggpubr](https://rpkgs.datanovia.com/ggpubr/)  
+- [ggside](https://github.com/jtlandis/ggside)  
 - [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/)  
 - [ggthemes](https://yutannihilation.github.io/allYourFigureAreBelongToUs/ggthemes/)  
 - [ggVennDiagram](https://github.com/gaospecial/ggVennDiagram)  
+- [Hmisc](https://hbiostat.org/R/Hmisc/  )
 - [hrbrthemes](https://hrbrmstr.github.io/hrbrthemes/)  
 - [remotes](https://remotes.r-lib.org)  
+- [ridgeline](https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html)  
+- [Rmisc](https://github.com/RyanHope/Rmisc)  
 - [scales](https://scales.r-lib.org)  
 - [viridis](https://cran.r-project.org/web/packages/viridis/index.html)
