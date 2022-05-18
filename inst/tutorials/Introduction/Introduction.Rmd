@@ -9,7 +9,7 @@ output:
     allow_skip: true
 runtime: shiny_prerendered
 description: >
-  Learn how to use R to apply the concepts taught in the STAT 500 course.
+  Learn how to use R to apply the concepts taught in a Statistics course.
 ---
 
 ```{r setup, include=FALSE}
@@ -20,6 +20,8 @@ library(grocerycart)
 library(fontawesome)
 library(ggVennDiagram)
 library(DiagrammeR)
+library(ggstatsplot)
+library(ggside)
 
 # Prepare data to be used
 data("grocery_data", package = "grocerycart")
@@ -33,6 +35,21 @@ grocery_table <-
   mutate(customer_age = as.integer(customer_age)) %>% 
   relocate(customer_id, customer_name, customer_age, household_size, order_date, payment_method, 
            .before = cost)
+
+grandiose <- 
+  eg_data %>% 
+  filter(store_name %>% str_detect("Grandiose")) %>% 
+  count(store_name) %>% 
+  slice_max(order_by = n, n = 3) %>% 
+  left_join(eg_data, by = "store_name") %>% 
+  select(store_name, price)
+
+grandiose2 <- 
+  grandiose %>% 
+  mutate(store_name = fct_recode(store_name, 
+                                 Barsha = "Grandiose - Barsha", 
+                                 AbuDhabi = "Grandiose Hypermarket Abu Dhabi", 
+                                 Jumeirah = "Grandiose Jumeirah"))
 
 grocery_table %>% 
   group_by(household_size) %>% 
@@ -446,7 +463,7 @@ quiz(
   question("Find P(2nd Tails).",
     answer("0.25"),
     answer("0.50"),
-    answer("0.65", correct = TRUE, message = .5(.8) + .5(.5)),
+    answer("0.65", correct = TRUE, message = ".5(.8) + .5(.5)"),
     answer("0.80")
   ),
   question("Are the 1st and 2nd flip independent?",
@@ -677,15 +694,13 @@ In the next section, be ready to explore confidence intervals.
 
 ## Lesson 5
 
-It's time to talk about statistical inference. In particular, we will be dicussing confidence intervals in R. Remember the general form `r cat(crayon::bold("CI = Point Estimate ± Margin of Error"))`.
+It's time to start talking about statistical inference. In particular, we will be dicussing confidence intervals in R. Remember the general form of a confidence interval: `r cat(crayon::bold("CI = Point Estimate ± Margin of Error"))`.
 
 ### `r fa("fas fa-lightbulb")` Code 5.1: Confidence Intervals for Population Proportion (Manual)
 
-The 'Manual' part means that we will be calculating each part separately rather than using a specific function (see Code 5.3).
+The 'Manual' part means that we will be calculating each part of the confidence interval separately rather than using a specific function (see Code 5.3). Practically, you are better off using a function to calculate the interval for you, but here we will go about it the way it is presented in the course to strengthen your understanding of the concept.
 
-Let's construct the confidence interval for the following: a random sample of 250 current NBA players and coaches is taken. They are asked whether they think Michael Jordan is the greatest basketball player of all time (i.e., GOAT rating). Of the 250 surveyed, 161 respond with 'yes'. Calculate a 95% confidence interval for the overall GOAT rating of the Michael Jordan.
-
-The conditions are satisfied.
+Let's construct the confidence interval for the following: a random sample of 250 current NBA players and coaches is taken. They are asked whether they think Michael Jordan is the greatest basketball player of all time (i.e., GOAT rating). Of the 250 surveyed, 161 respond with 'yes'. Calculate a 95% confidence interval for the overall GOAT rating of Michael Jordan (assume that the conditions are satisfied).
 
 ```{r ci-prop, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # point estimate
@@ -711,7 +726,7 @@ upper_bound <- round((pe + moe), 4)
 cat(crayon::magenta("The 95% confidence interval is (", lower_bound, ", ", upper_bound, ")"))
 ```
 
-We are 95% confident that between 58.46% and 70.34% of current NBA players and coaches think Michael Jordan is the greatest basketball player of all time.
+We are 95% confident that between 58.46% and 70.34% (more than half) of current NBA players and coaches think Michael Jordan is the greatest basketball player of all time.
 
 ### `r fa("fas fa-lightbulb")` Code 5.2: Confidence Intervals for Population Mean (Manual)
 
@@ -719,7 +734,7 @@ We're going to be constructing the confidence interval only for the case where t
 
 Let's construct the confidence interval for the following: a random sample of 40 flights that depart from Los Angeles International Airport is taken. The average delay in departure time for this sample is 21 minutes and the standard deviation is 7 minutes (i.e., on average, the flights took off 21 minutes after the expected departure time). Calculate a 90% confidence interval for the average departure delay time for the airport.
 
-Since the sample size is 40 > 30, by the Central Limit Theorem, the sampling distribution of the mean departure delay time is approximately normal. We can use te Student t distribution to construct the 90% confidence interval.
+Since the sample size is 40 > 30, by the Central Limit Theorem, the sampling distribution of the sample mean departure delay time is approximately normal. We can use the *Student t distribution* to construct the 90% confidence interval:
 
 ```{r mean-prop, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # point estimate
@@ -745,11 +760,11 @@ upper_bound <- round((pe + moe), 2)
 cat(crayon::magenta("The 95% confidence interval is (", lower_bound, ", ", upper_bound, ")"))
 ```
 
-We are 95% confident that the mean departure delay time at Los Angeles International Airport is between 19.14 and 22.86 minutes.
+We are 95% confident that the mean departure delay at the Los Angeles International Airport is between 19.14 and 22.86 minutes.
 
 ### `r fa("fas fa-lightbulb")` Code 5.3: Confidence Intervals (`Rmisc` package)
 
-The `CI()` function in the `Rmisc` package constructs the confidence interval in one step, as long as we have the original data. We will quickly generate normal random data with mean of 21 and standard deviation of 7.
+The `CI()` function in the `Rmisc` package constructs the confidence interval in one step, as long as we have the original data. We will quickly generate normal random data with mean of 21 and standard deviation of 7 (similar to the data from Code 5.2):
 
 ```{r ci-rmisc, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # load Rmisc package
@@ -763,13 +778,13 @@ random_data <- rnorm(40, 21, 7)
 CI(x = random_data, ci = .9)
 ```
 
-Notice that the confidence interval is similar to the one we constructed manually in Code 5.2. It is not exactly the same since the mean and standard deviations will not be exactly 21 and 7, respectively, when using `rnorm()`.
+Notice that the confidence interval is similar to the one we constructed manually in Code 5.2. It is not exactly the same since the mean and standard deviations will not be exactly 21 and 7, respectively, when using `rnorm()`, but close enough for our purpose.
 
 ### `r fa("fas fa-lightbulb")` Code 5.4: Checking Normality
 
-Finally, let's see how we can draw the normal probability plot in R to check if the data is normal. We will learn about 2 methods; the second allows for more customizations.
+Finally, let's see how we can draw the normal probability plot in R to check if the data is normal. We will learn about 2 methods; the second allows for more customization.
 
-In the following example, we will generate random normal data, then build the plot using `stat_qq()` from *ggplot2*.
+In the following example, we will generate random normal data, then build the plot using `stat_qq()` from *ggplot2*:
 
 ```{r check-normality-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # generate normal data
@@ -779,10 +794,11 @@ r_data <- tibble(index = 1:80,
 # build normal probability plot
 r_data %>% 
   ggplot(aes(sample = values)) + 
-  stat_qq(color = "steelblue")
+  stat_qq(color = "steelblue") + 
+  stat_qq_line(size = 1, color = "orange")
 ```
 
-Next, we will generate non-normal data (uniform), then build the plot using `ggqqplot()` from *ggpubr*.
+Next, we will generate non-normal data (uniform), then build the plot using `ggqqplot()` from *ggpubr*:
 
 ```{r check-normality-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # load ggpubr
@@ -820,13 +836,13 @@ r_data %>%
            ggtheme = theme_pubclean())
 ```
 
-If we increase the confidence interval to .99, then the confidence bounds will be wider. It is clear from the plots that data from plots 1 and 3 are normal as the data values fall within the bounds.
+It is clear from the 3 plots above that data from the first and third code blocks are normal as the data values fall within the bounds. If we increase the confidence interval to .99, then the confidence bounds will be wider
 
 This ends our discussion on confidence intervals. Next up is hypothesis testing.
 
 ## Lesson 6
 
-In this section, we will explore hypothesis testing in R by conducting the tests and drawing graphs to visually highlight what is going on. Be sure to read the course notes from lessons 6a and 6b before moving on with this section. In all the example below, we assume that the conditions are satisfied.
+In this section, we will explore hypothesis testing in R by conducting tests and drawing graphs to visually highlight what is going on. Be sure to read the course notes from lessons 6a and 6b before moving on with this section. In all the examples below, we assume that the necessary conditions are satisfied.
 
 It is a good habit to add comments to your code. You can do so in R via the `#` symbol.
 
@@ -845,9 +861,9 @@ prop.test(x = 112, n = 200, p = .5, alternative = "greater", conf.level = .9, co
 
 Since p-value = .04484 < .1, we can conclude that the proportion of red cereal boxes at the supermarket is larger than 0.5 at a 10% level of significance.
 
-\**Note: To find the z-test statistic, you will need to take the square root of the X-squared statistic that the `prop.test()` function returns. The explanation for this is beyond the scope of this lesson.*
+\**Note: To find the z-test statistic, you will need to take the square root of the X-squared statistic that the `prop.test()` function returns. The explanation for this relationship between the two statistics is beyond the scope of this tutorial*
 
-We can also use `prop.test()` to calculate the confidence intervals. Take the same basketball example from Code 5.1 in lesson 5. We found the 95% confidence interval to be (.5846, .7034). Let's use `prop.test()` to verify that we get the same results.
+We can also use `prop.test()` to calculate the confidence intervals. Take the same basketball example from Code 5.1 in lesson 5. We found that the 95% confidence interval to be (.5846, .7034). Let's use `prop.test()` to see if we get the same results (spoiler alert: we will).
 
 ```{r ct-prop-test, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 test_results <- prop.test(x = 161, n = 250, p = .5, alternative = "two.sided", conf.level = .95, correct = FALSE)
@@ -855,11 +871,11 @@ test_results <- prop.test(x = 161, n = 250, p = .5, alternative = "two.sided", c
 test_results$conf.int
 ```
 
-Notice that the values are the same to 2 decimal places.
+Notice that the confidence intervals are indeed the same (to 2 decimal places).
 
 ### `r fa("fas fa-lightbulb")` Code 6.1: Hypothesis Testing for 1 Sample Mean
 
-Say we take a random sample of 200 cereal boxes of the same kind. The manufacturer claims that each box contains 30 grams of cereal. We empty the contents of each box, and find the mean weight of the cereal in the boxes to be 29.3 grams. Based on our measurements, can we reject the manufacturer's hypothesis that each box contains 30 grams of cereal at a 5% significance level?
+Say we take a random sample of 200 cereal boxes of the same kind. The manufacturer claims that each box contains 30 grams of cereal. We empty the contents of each box, and find the mean weight of the cereal in the boxes to be 29.4 grams with a standard deviation of .2 grams. Based on our measurements, can we reject the manufacturer's hypothesis that each box contains 30 grams of cereal at a 5% significance level?
 
 ```{r ht-mean, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # Ho: mu = 30 vs Ha: mu ≠ 30
@@ -868,7 +884,7 @@ Say we take a random sample of 200 cereal boxes of the same kind. The manufactur
 
 # cereal box weights
 set.seed(500)
-cereal <- rnorm(200, mean = 29.3, sd = .8)
+cereal <- rnorm(200, mean = 29.4, sd = .2)
 
 # conduct 1 sample mean t-test
 t.test(x = cereal, mu = 30, alternative = "two.sided", conf.level = .95)
@@ -876,21 +892,21 @@ t.test(x = cereal, mu = 30, alternative = "two.sided", conf.level = .95)
 
 Since p-value ~ 0 < .05, we can conclude that the true mean weight of this brand of cereal boxes is not 30 grams as claimed by the manufaturer, at a 5% level of significance.
 
-The confidence interval is (29.17, 19.38), indicating that 30 does not fall within the bounds, so we can reject the manufacturer's claim.
+The confidence interval is (29.35, 29.41), indicating that 30 does not fall within the bounds, so we can reject the manufacturer's claim.
 
-Before moving on to the next section, try running the hypothesis test examples from the course notes in R.
+Before moving on to the next section, try running the hypothesis test examples from the course notes in R using the same methods as above.
 
 ## Lesson 7
 
-Let's move on to a higher data dimension from our previous lesson and compare two population parameters.
+Let's move on to one dimension higher from our previous lesson and compare two population parameters.
 
 ### `r fa("fas fa-lightbulb")` Code 7.1: Comparing Two Population Proportions
 
 In this case, the data values are categorical and taken from two distinct groups.
 
-Suppose we asked high-school and university students wether they owned an Apple product or not (e.g., iphone, macbook laptop). Of the 166 high school students sampled, 108 said 'yes' and of the 315 university students sampled, 246 said 'yes'.
+Suppose we asked high-school and university students wether they owned an Apple product or not (e.g., iphone, macbook laptop, Apple watch). Of the 166 high school students sampled, 108 said 'yes' and of the 315 university students sampled, 246 said 'yes'.
 
-Does the data indicate that the proportions that said 'yes' (i.e., own an Apple products) are different for high-school and university students at a 5% significance level?
+Does the data indicate that the proportions that said 'yes' (i.e., own an Apple product) are different for high-school and university students at a 5% significance level?
 
 ```{r ht-two-prop, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # Ho: p1 = p2 vs Ha: p1 ≠ p2
@@ -906,16 +922,18 @@ prop.test(data_mat, alternative = "two.sided", conf.level = .95, correct = FALSE
 
 Since the p-value = .002 < .05, we conclude that there is enough evidence to suggest that the proportions of high school and university students who own an Apple product are different.
 
+Take some time to familiarize yourself with the layout of the output.
+
 ### `r fa("fas fa-lightbulb")` Code 7.2: Comparing Two Population Means (Independent)
 
 In this case, the data values are quantitative and taken from two distinct groups.
 
-Say we measured the resting heart rate (RHR) of 53 professional soccer and 55 golf players. It is claimed that the soccer players have a lower RHR than golf athletes. Our measurements are as follows: mean_soccer = 59 beats per minute (bpm) and sd_soccer = 4.6 bpm, while mean_golf = 68 bpm and sd_golf = 6.4 bpm.
+Say we measured the resting heart rate (RHR) of 53 professional soccer players and 55 golfers. It is claimed that the soccer players have a lower RHR than golf athletes. Our measurements are as follows: mean_soccer = 59 beats per minute (bpm) and sd_soccer = 4.6 bpm, while mean_golf = 68 bpm and sd_golf = 6.4 bpm.
 
 Do the measurements provide sufficient evidence to conclude that, on average, professional soccer players have a lower RHR than pro golfers?
 
 ```{r ht-two-ind-mean, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# Ho: mu_soccer = mu_golf vs Ha: mu_soccer ≠ mu_golf
+# Ho: mu_soccer = mu_golf vs Ha: mu_soccer < mu_golf
 
 # alpha = .95
 
@@ -931,7 +949,7 @@ golf <- rnorm(55, mean = 65, sd = 6.8)
 t.test(x = soccer, y = golf, alternative = "less", conf.level = .95, paired = FALSE, var.equal = equal_var)
 ```
 
-The `equal_var` object will returm `TRUE` if the variances can be assumed to be equal, which will in turn run the pooled variance t-test. If one of the variances is greater by a factor of 2 than the other, then `equal_var` object will returm `FALSE`, running the unpooled variance t-test.
+The `equal_var` object will returm `TRUE` if the variances can be assumed to be equal, which will in turn run the pooled variance t-test. If one of the variances is greater by a factor of 2 or more than the other variance, then `equal_var` object will returm `FALSE`, which tells `t.test()` to run the unpooled variance t-test.
 
 Since p-value ~ 0 < .05, we can conclude that the true mean RHR of professional soccer players is lower than that of pro golfers.
 
@@ -944,24 +962,26 @@ Suppose that a group of sport scientists have devised a new workout routine. The
 Do the measurements provide sufficient evidence to conclude that people can lose weight in 4 weeks while on the new workout program?
 
 ```{r ht-two-pair-mean, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# Ho: mu_before = mu_after vs Ha: mu_before ≠ mu_after
+# Ho: mu_before = mu_after vs Ha: mu_before > mu_after
 
 # alpha = .99
 
-# cereal box weights
+# generate random weights
 set.seed(500)
 before <- runif(n = 72, min = 80, max = 89)
 after <- runif(n = 72, min = 72, max = 85)
 
 # conduct 1 sample mean t-test
-t.test(x = before, y = after, alternative = "two.sided", conf.level = .99, paired = TRUE)
+t.test(x = before, y = after, alternative = "greater", conf.level = .99, paired = TRUE)
 ```
 
-Since p-value ~ 0 < .01, we can conclude that the workout routine is effective for weight loss. Furthermore, we are 99% confident that the true mean weight loss is between 4.07 and 7.40 kg.
+To run a paired t-test in R, you have to set the `paired` argument in `t.test()` to `TRUE`.
+
+Since p-value ~ 0 < .01, we can conclude that the workout routine can help individuals lose weight in as little as 4 weeks. Furthermore, we are 99% confident that the true mean weight loss is between 4.07 and 7.40 kg.
 
 ### `r fa("fas fa-lightbulb")` Code 7.4: Comparing Two Population Variances
 
-Suppose that the statisticians working at a chocolate manufacturer suspects that one of the older machines is no longer producing the desired weight of chocolate in each package consistently. They test their claim by comparing the variance in weight of 100 pieces of chocolate produced by the older machine and a newer one that they know works as desired.
+Suppose that the statisticians working at a chocolate factory suspect that one of the older machines is no longer producing the desired weight of chocolate in each package consistently. They test their claim by comparing the variance in weight of 100 pieces of chocolate produced by the older machine and a newer one that they know works as desired.
 
 Do the measurements provide sufficient evidence to conclude that the old machine needs to be fixed?
 
@@ -972,39 +992,42 @@ Do the measurements provide sufficient evidence to conclude that the old machine
 
 # cereal box weights
 set.seed(500)
-old <- runif(n = 100, min = 2.42, max = 2.49)
+old <- runif(n = 100, min = 2.43, max = 2.49)
 new <- runif(n = 100, min = 2.48, max = 2.52)
 
 # conduct 1 sample mean t-test
 var.test(x = old, y = new, alternative = "two.sided", conf.level = .99)
 ```
 
-Since p-value ~ 0 < .01, we can conclude that the old machine has a different variance than the newer well-working machine -> the manufacturer will need to fix the old machine in order to produce the desired weight of chocolate consistently.
+Since p-value ~ 0 < .01, we can conclude that the old machine has a different variance than the newer well-working machine -> the factory will need to fix the old machine in order to produce the desired weight of chocolate consistently.
 
-This concludes our section on cmpaing two population variances. Next, we will discuss how to use the Chi-Square test when both the response and the explanatory variable are qualitative.
+This concludes our section on comparing two population proportions, means and variances. Next, we will discuss how to use the Chi-Square test when both the response and the explanatory variable are qualitative.
 
 ## Lesson 8
 
-How can we test if two categorical variables are dependent? Enter the Chi-Square Test of Independence. First, let's take a look at contingency tables in R.
+How can we test if two categorical variables are dependent? Enter the Chi-Square Test of Independence. But first, let's take a look at contingency tables in R.
 
 ### `r fa("fas fa-lightbulb")` Code 8.1: Contingency Table
 
 We touched on proportion tables in lesson 1, but we will dive deeper in this section.
 
-Let's start by creating a table for the 2 categorical variables **payment_method** (3 levels) and **household_size** (7 levels) from our **grocery_table** data. The contingency table will be 3 by 7.
+Let's start by creating a table for the 2 categorical variables **payment_method** (3 levels) and **household_size** (7 levels) from our **grocery_table** data (see Lesson 0). The contingency table will be 3 by 7.
 
 ```{r cont-table-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 with(grocery_table, table(payment_method, household_size))
+# OR table(grocery_table$payment_method, grocery_table$household_size)
 ```
 
-We can add the total margins with `add_margins()`.
+Avoid retyping the data name by using `with()`: the first argument takes the data, while the second argument takes the expression to evaluate.
+
+We can add the total margins to the contingency table with `add_margins()`.
 
 ```{r cont-table-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 with(grocery_table, table(payment_method, household_size)) %>% 
   addmargins()
 ```
 
-Next, let's visualize the table the relationship between **payment_method** and **household_size** with 3 barplots and a mosaic plot.
+Next, let's visualize the relationship between **payment_method** and **household_size** with 3 barplots and a mosaic plot.
 
 The stacked bar chart below shows that online payment was the most popular method across all household sizes. Cash payment was the least popular for all household sizes.
 
@@ -1019,7 +1042,7 @@ grocery_table %>%
   theme(legend.position = "bottom")
 ```
 
-We can represent the same information, but with the bars next to each other. Simply change the argument for `position` to `"dodge"`.
+We can represent the same information, but with the bars placed next to each other. Simply change the argument for `position` from `"stack"` to `"dodge"` in `geom_bar()`.
 
 ```{r cont-table-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # Bar chart
@@ -1032,24 +1055,25 @@ grocery_table %>%
   theme(legend.position = "bottom")
 ```
 
-What if you want to group the bars by each payment method? This is where `facet_wrap()` will help us acheive that goal. Again, it's clear that online payment is the most popular method. We can also note that households with 2 individuals are ordering the most.
+What if you want to group the bars by each payment method? This is where `facet_wrap()` will help us acheive that goal by creating a seperate panel for each level in the grouping variable (i.e., payment method).
+
+Again, it's clear that online payment is the most popular method. We can also note that households with 2 individuals are ordering the most.
 
 ```{r cont-table-five, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # Bar chart - seperated by payment method
 grocery_table %>% 
   ggplot(aes(x = household_size, fill = household_size)) + 
-  geom_bar(position = "dodge") + 
+  geom_bar(position = "dodge", color = NA) + 
   labs(x = "Household Size", y = "Frequency", title = "Payment Methods Preferred by Household Size") + 
   scale_fill_viridis_d(direction = 1, guide = guide_legend(title = "Payment")) + 
-  ggpubr::theme_pubclean() + 
   facet_wrap(~ payment_method) + 
   theme(legend.position = "bottom")
 ```
 
-Each 'block' of the mosaic plot tells us 2 pieces of info: (1) the vertically longer the block, the more orders used the payment method on the left, and (2) the horizontally wider the block, the more common the household size on the bottom. In this case, the width of the blocks above household size of 7 reflect that only the fewest orders were placed by households of size 7. Online payment was the longest for every household size, reflecting that it was the most popular method across all household sizes.
+What can a mosaic plot tell us? Let's create one below and find out:
 
 ```{r cont-table-six, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# load ggmosaic
+# load ggmosaic to use geom_mosaic()
 library(ggmosaic)
 
 # Mosaic plot
@@ -1061,46 +1085,48 @@ grocery_table %>%
   theme(legend.position = "bottom")
 ```
 
-The 4 graphs above more or less tell the same story, and they can all be further customized to suit your needs.
+Each 'block' of the mosaic plot tells us 2 pieces of info: (1) the vertically longer the block, the more orders used the payment method on the left, and (2) the horizontally wider the block, the more common the household size on the bottom. In this case, online payment was the longest block for every household size, reflecting that it was the most popular method across all household sizes. Also, households of size 7 had the narrowest blocks horizontally, reflecting that the fewest orders were placed by households of size 7.
+
+The 4 graphs above more or less tell the same story, and they can all be further customized to suit your needs. Practically, you will start an anlysis by generating the simplest graph that can give you a basic idea of the data that you will be working with. Then, as your analysis develops, you can start to apply the customizations. Be mindful of the time that you spend customizing your graphs as it is very easy to fall into the rabbit hole of 'over-customization`. 
 
 ### `r fa("fas fa-lightbulb")` Code 8.2: Chi-Square Test
 
-Fianlly, let's test whether household size and payment method are dependent. Since both variables are categorical, we can run a chi-square test. Here's how to do it in R:
+Can you tell if **household size** and **payment method** are dependent? Since both variables are categorical, we can run a chi-square test. Here's how to do it in R:
 
 ```{r chi-square-test-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # Ho: payment method and household size are independent
 # Ha: payment method and household size are related 
 
-# contingency table format to pass on to chisq.test
+# contingency table format to pass on to chisq.test()
 contingency_table <- with(grocery_table, table(payment_method, household_size))
 
 # conduct chi-square test
 chisq.test(contingency_table)
 ```
 
-Since p-value = .2248 > .05, we can conclude that the variables are independent.
+Since p-value = .2248 > .05, we can conclude that the variables are independent. This makes sense since our graphs from Code 8.1 showed that online payment was the most popular peyment method across all household sizes, followed by credit card on delivery.
 
-To extract a specific output, use the `$` symbol as such:
+To extract a specific part of an object in R, use the `$` symbol after the object's name:
 
 ```{r chi-square-test-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# contingency table format to pass on to chisq.test
+# contingency table format to pass on to chisq.test()
 contingency_table <- with(grocery_table, table(payment_method, household_size))
 
 # conduct chi-square test
 chi_output <- chisq.test(contingency_table)
 
-# chi_output$p.value
-# chi_output$expected
-
-# print all the items in the output, which is a list
+# print all the items that you can call with '$'
 chi_output %>% 
   map(~ print(.))
+
+# chi_output$p.value
+# chi_output$expected
 ```
 
 Finally, how much a cell contributes to the total chi-square score is calculated as follows:
 
 ```{r chi-square-test-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# contingency table format to pass on to chisq.test
+# contingency table format to pass on to chisq.test()
 contingency_table <- with(grocery_table, table(payment_method, household_size))
 
 # conduct chi-square test
@@ -1112,26 +1138,13 @@ chi_output <- chisq.test(contingency_table)
 
 The cell **Credit Card on delivery** and **7** contributes the most (47%) to the chi-square score.
 
-### `r fa("fas fa-lightbulb")` Code 8.3: Final Plot
-
-Before wrapping up this lesson, let's create 1 more plot:
-
-```{r cont-table-seven, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-library(ggstatsplot)
-
-# plot
-grocery_table %>% 
-  ggstatsplot::ggbarstats(x = payment_method, y = household_size) + 
-  labs(caption = NULL) + 
-  scale_fill_viridis_d() + 
-  theme(legend.position = "bottom")
-```
-
 This concludes lesson 8. Coming up next is linear regression.
 
 ## Lesson 9
 
-In this penultimate lesson we will explore correlation and simple linear regression. When the response and explanatory variables are quantitative, a good place to start is to analyze the linear relationship between the variables.
+In this penultimate lesson we will explore correlation and simple linear regression. Linear regression is a topic that deserves its own tutorial, so we will only cover the absolute basics here to get you up and running.
+
+When the response and explanatory variables are both quantitative, a good place to start is to analyze the linear relationship between them.
 
 ### `r fa("fas fa-lightbulb")` Code 9.1: Correlation Coefficients
 
@@ -1145,7 +1158,7 @@ mtcars %>%
   ggpairs()
 ```
 
-There's a lot going on in the diagram above, but if you read the course notes for lesson 9, then you will be able to interpret the output in a few minutes.
+There's a lot going on in the diagram above, but if you read the course notes for lesson 9, then you will be able to interpret the output, which displays the scatter plot and correlation coefficient between each pair of variables, as well as the density distribution of each variable.
 
 For our next visualization, we are going to construct a correlation matrix with `corrplot()` from the *corrplot* package:
 
@@ -1178,6 +1191,7 @@ with(mtcars, cor.test(mpg, hp))
 We can also run several correlation tests at once with `rcorr()` from *Hmisc*.
 
 ```{r cor-test-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load Hmisc to use rcorr()
 library(Hmisc)
 
 # matrix form since rcorr() needs matrix as input
@@ -1190,41 +1204,44 @@ data <-
 rcorr(data)
 ```
 
+The output displays the correlation coefficients and the p-values for the correlation tests.
 
 ### `r fa("fas fa-lightbulb")` Code 9.3: Correlation
 
 Let's combine the ideas of correlation coefficients and tests in a visualization:
 
 ```{r cor-test-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load packages to use ggscatterstats()
 library(ggstatsplot)
 library(ggside)
 
 # plot
 mtcars %>% 
-  ggscatterstats(x = mpg, y = hp) + 
-  labs(caption = NULL) + 
-  scale_fill_viridis_d() + 
-  theme(legend.position = "bottom")
+  ggscatterstats(x = mpg, y = hp, results.subtitle = TRUE) + 
+  labs(caption = NULL)
 ```
 
-Can we combine the two ideas for many variables at once, as we did with the correlation tests in the previous section? Absolutely! We can do that with `correlation()` from the *correlation* package:
+Can we combine the two ideas for many variables at once, as we did with the correlation tests in Code 9.2? Absolutely! We can do that with `correlation()` from the *correlation* package:
 
 ```{r cor-test-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load to use correlation()
 library(correlation)
 
 # correlation matrix
 mtcars %>% 
   select(mpg, hp, disp, drat, wt, qsec) %>% 
-  correlation(include_factors = TRUE)
+  correlation(include_factors = TRUE, ci = .90)
 ```
+
+The output above displays the correlation coefficient, 90% confidence interval (for the coefficient), t-statistic and adjusted p-value for all the pairwise correlation tests. With a few lines of code, we managed to get an idea of the linear relationships between the variables.
 
 ### `r fa("fas fa-lightbulb")` Code 9.4: Simple Linear Regression
 
-Since we are nearing the end of this lesson (and tutorial as a whole), let's analyze a full SLR with a publication worthy visualization.
+We have finally reached the part where we build an SLR model and create some nice plots.
 
 Suppose we want to study the relationship between **mpg** and **hp**, specifically we want to know how **mpg** changes as **hp** increases by 1 unit. Let's build the SLR model then check the diagnostic plots to see if the 4 conditions for SLR are satisfied. 
 
-Each one of the code example below will build on the previous one, starting with this:
+Each one of the code examples below will build on the previous ones, starting with this:
 
 ```{r slr-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 lm(formula = mpg ~ hp, data = mtcars) %>% 
@@ -1253,7 +1270,9 @@ mtcars %>%
   hrbrthemes::theme_ipsum()
 ```
 
-Can we trust these results? We need to draw the diagnostic plots to check if the SLR conditions are satisfied. The basic way of doing this is via `plot()`.
+`str_glue()` is one of my all time favourite functions. Its power lies in its ability to conveniently evalute and integrate R expressions into a string. In other words, you can write R code within the curly braces `{}` and `str_glue()` will evaluate it and include it as part of the string.
+
+Can we trust the resutls from `lm()`? We need to draw the diagnostic plots to check if the SLR conditions are satisfied. The basic way of doing this is via `plot()`.
 
 ```{r slr-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # build slr model
@@ -1266,29 +1285,30 @@ par(mfrow = c(2, 2))
 plot(model)
 ```
 
-Alternatively, to create publication friendly plots it is worth familiarizing yourself with `autoplot()` from *ggfortify*. You can customize the layout of the graphs largely with the `theme()` function.
+Alternatively, we can qucikly create diagnostic plots with `autoplot()` after loading *ggfortify*. You can customize the layout of the graphs largely with the `theme()` function.
 
 ```{r slr-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # build slr model
 model <- lm(formula = mpg ~ hp, data = mtcars)
 
-# 4 regression diagnostic plots
+# 6 regression diagnostic plots
 library(ggfortify)
 
-autoplot(model, color = "steelblue", shape = 21, label.repel = TRUE) + 
-  ggthemes::theme_economist_white() + 
-  theme(text = element_text(family = "Bebas Neue")) # changes the title + axis labels to the Bebas Neue font
+autoplot(model, which = 1:6, ncol = 3, color = "steelblue", label.repel = TRUE) + 
+  theme_bw() + 
+  theme(text = element_text(family = "Indie Flower")) # changes the title + axis labels to the 'Indie Flower' font
 ```
 
-The points with labels (e.g., 'Maserati Bora') are potential outliers/leverage points. So, what do you think? Are the SLR conditions satisfied for our example?
+Here's how to interpret the plots:
+A- Normal Q-Q to assess the normality condition. Notice the 4 points at the top right that are way above the line. This indictaes that the shape might be slgihtly right skewed. To further analyze the normality, we can plot the density of the residuals `plot(density(residuals(model)), main = "Density")`. In our case, we cannot confidently assume that the normality assumption is satisfied.
+B- Residuals vs Fitted can help us to study the independence and variance of the errors. The points are spread out fairly evenly across the horizontal y = 0 line (i.e., there is no clear bowtie or megaphone shape) and there is no pattern, so both assumptions are not violated. We can run a formal test with the following: `lmtest::bptest(model)`.  
+C- The Cook's distance and residuals vs leverage graphs help detect the potential outliers in the data (the 'how' is beyond the scope of this tutorial).  
 
 We have reached the end of lesson 9. One more lesson to go.
 
-
-
 ## Lesson 10
 
-We're so close to the end! Our final lesson is about ANOVA, one of the most important statistical methods to have in your toolbox. As we did with SLR, we will learn how to conduct one way anova and check for the conditions. We will end by running post-hoc tests.
+We're almost across the finish line! Our final lesson is about ANOVA, one of the most important statistical methods to have in your toolbox. As we did with SLR, we will learn how to conduct one way anova and check for the conditions. We will end by running a post-hoc test.
 
 ### `r fa("fas fa-lightbulb")` Code 10.1: Data Preparation
 
@@ -1314,18 +1334,9 @@ grandiose %>%
             variance = var(price))
 ```
 
-Before running ANOVA, let's visualize the data with a boxplot and overlaying the points with `geom_quasirandom()`:
+Before running ANOVA, let's visualize the data with a boxplot and overlay the points with `geom_quasirandom()`:
 
 ```{r anova-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# data prep
-grandiose <- 
-  eg_data %>% 
-  filter(store_name %>% str_detect("Grandiose")) %>% 
-  count(store_name) %>% 
-  slice_max(order_by = n, n = 3) %>% 
-  left_join(eg_data, by = "store_name") %>% 
-  select(store_name, price)
-
 # boxplot with data points
 grandiose %>% 
   ggplot(aes(x = store_name, y = price, color = store_name)) + 
@@ -1338,22 +1349,13 @@ grandiose %>%
   theme(legend.position = "none")
 ```
 
-At a quick glance, we can see the products in **Grandiose Hypermarket Abu Dhabi** are the most expensive on average, but is the difference big enough to conclude a statistical significance? Let's find out.
+At a quick glance, we can see that the products in **Grandiose Hypermarket Abu Dhabi** are the most expensive on average, but is the difference big enough to conclude a statistical significance? Let's find out.
 
 ### `r fa("fas fa-lightbulb")` Code 10.2: ANOVA
 
 Time to finally conduct ANOVA in R:
 
 ```{r anova-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# data prep
-grandiose <- 
-  eg_data %>% 
-  filter(store_name %>% str_detect("Grandiose")) %>% 
-  count(store_name) %>% 
-  slice_max(order_by = n, n = 3) %>% 
-  left_join(eg_data, by = "store_name") %>% 
-  select(store_name, price)
-
 # anova
 aov(price ~ store_name, data = grandiose) %>% 
   summary()
@@ -1365,22 +1367,13 @@ Since the p-value ~ 0, we can conclude that at least one of the means is diffire
 
 Firstly, the data is independent.
 
-Secondly, is the normality assumption satisfied? Let's plot the residuals to check. By drawing a histogram for the model's residuals, we can see that the shape is right tailed. However, since (1) ANOVA is fairly robust against violations of the normality assumption and (2) the sample size for each store/group is very large ---> we might be able to assume that the normal assumption holds.
+Secondly, is the normality assumption satisfied? Let's plot the residuals to check. By drawing a histogram for the model's residuals, we can see that the shape is right tailed. However, since (1) ANOVA is fairly robust against violations of the normality assumption and (2) the sample size for each store/group is very large ---> we might be able to assume that the normal assumption holds. Further analysis is suggested before assuming so, but for the sake of this example, we will say that normality is satisfied.
 
-In a real life setting, it might be better to also conduct a non-parametric test such as a Kruskal-Wallis Test (does not require the normality assumption) and compare the results. Alternatively, we can transform the response variable (price) to acheive a more normal distribution. For our case, we will assume that the normality assumption is satisfied.
+In a real life setting, it might be better to also conduct a non-parametric test such as a Kruskal-Wallis Test (does not require the normality assumption) and compare the results. Alternatively, we can transform the response variable (price) to achieve a more normal distribution. For our case, we will assume that the normality assumption is satisfied.
 
 Ok, let's now vizualize the histogram:
 
 ```{r anova-four, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# data prep
-grandiose <- 
-  eg_data %>% 
-  filter(store_name %>% str_detect("Grandiose")) %>% 
-  count(store_name) %>% 
-  slice_max(order_by = n, n = 3) %>% 
-  left_join(eg_data, by = "store_name") %>% 
-  select(store_name, price)
-
 # anova
 model_aov <- aov(price ~ store_name, data = grandiose)
 
@@ -1388,18 +1381,9 @@ model_aov <- aov(price ~ store_name, data = grandiose)
 hist(model_aov$residuals)
 ```
 
-Finally, we check if the variances are equal across the stores or not. A boxplot is great quick way to check for homogeneity of variances Also, we will run a formal test using `leveneTest()`. Levene's test was briefly mentioned in lesson 7 of the course notes.
+Finally, we check if the variances are equal across the stores or not. A boxplot is a great quick way to check for homogeneity of variances Also, we will run a formal test using `leveneTest()`. Levene's test was briefly mentioned in lesson 7 of the course notes.
 
 ```{r anova-five, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# data prep
-grandiose <- 
-  eg_data %>% 
-  filter(store_name %>% str_detect("Grandiose")) %>% 
-  count(store_name) %>% 
-  slice_max(order_by = n, n = 3) %>% 
-  left_join(eg_data, by = "store_name") %>% 
-  select(store_name, price)
-
 # Levene's test
 # Ho: variances are equal and Ha: at least one variance is different
 library(car)
@@ -1421,58 +1405,56 @@ Since p-value for Levene's test is ~ 0, we can conclude that the variances are n
 
 Also, it's a good idea to explore any potential outliers. This is out of scope of this course and tutorial so we will assume we do not have any major outliers.
 
+The good news is that we can use the same approach as we did in lesson 9 to create the diagnostic plots (see end of lesson 9 for the plot explanations):
+
+```{r slr-six, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# anova
+model_aov <- aov(price ~ store_name, data = grandiose)
+
+# 6 regression diagnostic plots
+library(ggfortify)
+
+autoplot(model_aov, which = 1:6, ncol = 3, color = "steelblue", label.repel = TRUE) + 
+  theme_bw() + 
+  theme(text = element_text(family = "Indie Flower")) # changes the title + axis labels to the 'Indie Flower' font
+```
+
+Recall that the `leveneTest()` above told us to assume heteroskedasticity of the residuals. This can also be seen in the residuals vs fitted values plot. The points get further apart as we go from left to right (i.e., megaphone shape).
+
 ### `r fa("fas fa-lightbulb")` Code 10.3: Post-hoc Tests
 
-Remeber that our ANOVA returned a significant result (see Code 10.1). How can we see which groups are different from each other? Post-hoc tests allow us to run multiple comparisons of all pairwise means:
-- Grandiose Barsha vs Grandiose Hypermarket Abu Dhabi
-- Grandiose Barsha vs Grandiose Jumeirah
-- GGrandiose Hypermarket Abu Dhabi vs Grandiose Jumeirah
+Remeber that our ANOVA returned a significant result (see Code 10.1). How can we see which groups are different from each other? Post-hoc tests allow us to run multiple comparisons for all pairwise means:
+- **Grandiose Barsha vs Grandiose Hypermarket Abu Dhabi**
+- **Grandiose Barsha vs Grandiose Jumeirah**
+- **GGrandiose Hypermarket Abu Dhabi vs Grandiose Jumeirah**
 
-Let's rename the 3 stores so as to save space when we plot the confident intervals soon. We can do this with ``
+Let's rename the 3 stores so as to save space when we plot the confident intervals soon. We can do this with `mutate()` and `fct_recode()`.
 
 To stay consistent with the course notes, we will run the Tukey HSD post-hoc test:
 
-```{r anova-six, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# data prep
-grandiose <- 
-  eg_data %>% 
-  filter(store_name %>% str_detect("Grandiose")) %>% 
-  count(store_name) %>% 
-  slice_max(order_by = n, n = 3) %>% 
-  left_join(eg_data, by = "store_name") %>% 
-  select(store_name, price) %>% 
+```{r anova-seven, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# rename the levels to save space on the plot
+grandiose2 <- 
+  grandiose %>% 
   mutate(store_name = fct_recode(store_name, 
                                  Barsha = "Grandiose - Barsha", 
                                  AbuDhabi = "Grandiose Hypermarket Abu Dhabi", 
                                  Jumeirah = "Grandiose Jumeirah"))
 
 # anova
-model_aov <- aov(price ~ store_name, data = grandiose)
+model_aov <- aov(price ~ store_name, data = grandiose2)
 
 # tukey post-hoc test
 TukeyHSD(model_aov, "store_name", ordered = TRUE, conf.level = 0.95)
 ```
 
-The output indicates that all stores are significantly different in terms of basket price (since adjusted p-value is ~ 0 for all pairwise comparisons).
+The output indicates that all stores are significantly different in terms of mean product price (since adjusted p-value is ~ 0 for all pairwise comparisons).
 
-Let's visualize the confident intervals for the differences. The only difference between the 2 code examples in this section is the use of `plot()` below:
+Let's visualize the confident intervals for the differences:
 
-```{r anova-seven, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
-# data prep
-grandiose <- 
-  eg_data %>% 
-  filter(store_name %>% str_detect("Grandiose")) %>% 
-  count(store_name) %>% 
-  slice_max(order_by = n, n = 3) %>% 
-  left_join(eg_data, by = "store_name") %>% 
-  select(store_name, price) %>% 
-  mutate(store_name = fct_recode(store_name, 
-                                 Barsha = "Grandiose - Barsha", 
-                                 AbuDhabi = "Grandiose Hypermarket Abu Dhabi", 
-                                 Jumeirah = "Grandiose Jumeirah"))
-
+```{r anova-eight, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
 # anova
-model_aov <- aov(price ~ store_name, data = grandiose)
+model_aov <- aov(price ~ store_name, data = grandiose2)
 
 # plot tukey post-hoc test CI
 TukeyHSD(model_aov, "store_name", ordered = TRUE, conf.level = 0.95) %>% 
@@ -1483,9 +1465,77 @@ All 3 confidence intervals do not contain 0. We can conclude that the **Abu Dhab
 
 We have reached the end of this lesson.
 
+## Bonus Lesson
+
+It's super easy to fall into the trap of trying to customize every single detail in your graphs. In this section, we will quickly present the `ggstatplot` package to create powerful graphs that pack a lot of info with only a few lines of code. It is worth your time to read the [documentation on `ggstatplot`](https://indrajeetpatil.github.io/ggstatsplot/) if you will be running a lot of statistical tests in R.
+
+We used `ggstatplot` once before in Code 9.3. Let's start by revisiting that example.
+
+### `r fa("fas fa-lightbulb")` Code B.1: `ggscatterstats()` (from lesson 9)
+
+```{r stat-one, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load packages to use ggscatterstats()
+library(ggstatsplot)
+library(ggside)
+
+# scatter plot
+mtcars %>% 
+  ggscatterstats(x = mpg, y = hp, 
+                 title = "Linear Relationship between HP and MPG", results.subtitle = TRUE) + 
+  labs(caption = NULL)
+```
+
+We have graphed a scatter plot of **hp** vs **mpg** overlayed with the regression line and standard error bounds, a histrogram for each variable, and also included the results from the statistical test at the top. All of this in about 4 lines of code.
+
+### `r fa("fas fa-lightbulb")` Code B.2: `ggbarstats()` (from lesson 8)
+
+Let’s investigate whether **payment method** and **household size** are dependent The test checks whether the proportion of payment methods was different across the household sizes.
+
+```{r stat-two, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# bar plot
+grocery_table %>% 
+  ggbarstats(x = payment_method, y = household_size, conf.level = .9) + 
+  labs(caption = NULL) + 
+  scale_fill_viridis_d() + 
+  theme(legend.position = "bottom")
+```
+
+The graph shows that payment method proportions were not different across household sizez. The p-value .22 > .1, so we cannot say that the 2 variables are dependent. The p-values above each bar comes from the Goodness of Fit test for each household size.
+
+### `r fa("fas fa-lightbulb")` Code B.3: `statsExpressions` Package
+
+Finally, let's visit the `statsExpressions` package, which allows us to add statistical expressions to our plots.
+
+Let's (1) build an ANOVA model to represent the relationship between **cost** and **payment method** from the **grocery_table** dataset. Then, we will (2) plot the relationship using a violin plot. Finally, we will (3) add the statistical expressions from the ANOVA model to the plot (this is done via `model_name$expression[[1]]`). That's a lot, but let's give it a try:
+
+res <- oneway_anova(iris, Species, Sepal.Length, type = "nonparametric")
+
+```{r stat-three, exercise = TRUE, exercise.eval = FALSE, exercise.startover = TRUE}
+# load package
+library(statsExpressions)
+
+# anova - mean basket cost across the 3 payment methods
+res_aov <- oneway_anova(data = grocery_table, x = payment_method, y = cost) # step (1)
+
+# graph 
+grocery_table %>% 
+  ggplot(aes(x = payment_method, y = cost, color = payment_method)) + 
+  geom_violin(trim = TRUE, fill = NA) + # step (2)
+  geom_boxplot(width = .1) + 
+  labs(x = "Payment Method", y = "Cost", 
+       title = "Heteroscedastic 1-way ANOVA for Mean Order Value", 
+       subtitle = res_aov$expression[[1]]) + # step (3)
+  hrbrthemes::theme_ipsum(grid = FALSE) + 
+  theme(legend.position = "none")
+```
+
+The main thing to note is that `res_aov$expression[[1]]` added the statistical expressions from the ANOVA output.
+
+That's all I wanted to add to this lesson for anyone who wants to embed statistical expressions into plots. 
+
 ## Lesson 00: Final Thoughts
 
-Congratulations! You have made it to the end of this tutorial and course. At this stage, you are able to start your own analysis from scratch and create publication worthy visualizations with *ggplot2*. Remember that you do not need to memorize all the functions presented in this tutorial. Focus on understanding the statistical theory first, and then you can search online on how to apply the concepts in R.
+Congratulations! You have made it to the end of this tutorial and course. At this stage, you are able to start your own analysis from scratch and create publication worthy visualizations with *ggplot2*. Remember that you do not need to memorize all the functions presented in this tutorial. With time, you will be automatically become more familiar with the main functions. Focus on understanding the statistical theory first, and then you can search online on how to apply the concepts in R.
 
 ### What next?
 
@@ -1501,9 +1551,11 @@ Here are some free resources to help you continue your R journey:
 
 ### Contact the author (me)
 
+If you notice any theory/code mistakes in this tutorial, kindly let me know:
+
 - [Github Profile](https://github.com/moamiristat)
 - [Email](mailto:moamiristat@protonmail.com)
 
-Hope you enjoyed this tutorial and good luck! Remember that you can always visit this tutorial by running the following command in your R console: `learnr::run_tutorial("introduction", "stat500r")`.
+Hope you enjoyed this tutorial and good luck in your R journey! Remember that you can always visit this tutorial by running the following command in your R console: `learnr::run_tutorial("introduction", "stat500r")`.
 
-THE END.
+THE END
