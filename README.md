@@ -1,4 +1,4 @@
-# stat500r <img src="inst/tutorials/Introduction/images/introduction.png" align="right" height="250px" />
+# stat500r <img src="inst/tutorials/Introduction/images/stat500r-hexsticker.png" align="right" height="250px" />
 
 With the **stat500r** package you can run an interactive R tutorial, in your web browser locally, that
 teaches how to use R to apply the concepts taught in
